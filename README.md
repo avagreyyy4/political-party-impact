@@ -1,8 +1,3 @@
-### Edit `_quarto.yml` (RStudio)
-
-Tip: From the file pane in RStudio, open `README.md`, which contains these instructions. You can delete steps as you complete them.
-
-- [ ] 1. Change the all caps info in the `title:`, `author:` and `repo-url` fields in the YAML (top) section of `_quarto.yml` to your info. (Note: it's very important to maintain the indenting structure in this file precisely as is -- be careful!)
 
 ### Render the book (RStudio)
 
