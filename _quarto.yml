@@ -23,7 +23,7 @@ book:
 
 format:
   html:
-    theme: cosmo
+    theme: lux
     code-fold: true
 
 
