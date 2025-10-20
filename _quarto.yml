@@ -6,11 +6,10 @@ execute:
   echo: true
 
 book:
-  title: "YOUR PROJECT TITLE"
+  title: "Political Party True Impact"
   author:
-    - AUTHOR1 (UNI1)
-    - AUTHOR2 (UNI2)
-  repo-url: https://github.com/YOUR_GITHUB_ACCOUNT/REPO_NAME
+    - Ava Grey (ag4378)
+  repo-url: https://github.com/avagreyyy4/political-party-impact
   date: today
   page-footer:
     right: |
