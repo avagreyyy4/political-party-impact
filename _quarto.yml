@@ -6,7 +6,7 @@ execute:
   echo: true
 
 book:
-  title: "Political Party True Impact"
+  title: "Political Party Impact"
   author:
     - Ava Grey (ag4378)
   repo-url: https://github.com/avagreyyy4/political-party-impact
