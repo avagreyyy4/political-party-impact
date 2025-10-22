@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>2&nbsp; Data – Political Party True Impact</title>
+<title>2&nbsp; Data – Political Party Impact</title>
 <style>
 code{white-space: pre-wrap;}
 span.smallcaps{font-variant: small-caps;}
@@ -100,7 +100,7 @@ ul.task-list li input[type="checkbox"] {
       <a href="./index.html" class="sidebar-logo-link">
       </a>
     <div class="sidebar-title mb-0 py-0">
-      <a href="./">Political Party True Impact</a> 
+      <a href="./">Political Party Impact</a> 
         <div class="sidebar-tools-main">
     <a href="https://github.com/avagreyyy4/political-party-impact" title="Source Code" class="quarto-navigation-tool px-1" aria-label="Source Code"><i class="bi bi-github"></i></a>
 </div>
@@ -176,6 +176,11 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="description" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="description"><span class="header-section-number">2.1</span> Description</h2>
+<p>The data for this project has been pulled from various government databases. The first data set is from the United States Bureau of Economic Analysis and contains information on each states’ GDP, Per capita personal income, and employment from 2001 to 2024 (https://www.bea.gov/data/income-saving/personal-income-by-state). The Bureau of Economic Analysis obtains most of their data from census government survey data or federal administration survey data.</p>
+<p>The second data set is directly from the United States census and contains median salary values broken down by ethnicity and gender from the years 2000 to 2024 (https://www.census.gov/data/tables/time-series/demo/income-poverty/historical-income-people.html). The United States Census obtains yearly data through randomized surveys to thousands of American households and with those results and government records, estimate population-sized values.</p>
+<p>The third data set is the Federal Reserve Bank of St.&nbsp;Louis (FRED) and contains information on each states’ median household income throughout the years 2001 to 2024 (https://fred.stlouisfed.org/release/tables?eid=259515&amp;rid=249). The data set has two variables: “State” and “Median Income” with 23 entries reflecting the years 2001 through 2024. The FRED obtains their aggregated data from the United States Census data.</p>
+<p>The last data set from The Rhode Island Department of Labor and Training and contains the unemployment rate for each state from 2000 to 2024 (https://dlt.ri.gov/labor-market-information). The data set has two columns, “State” and “Unemployment Rate” and 24 entries, spanning the yeras 2000 and 2024. Again, this data was obtained from the United States census.</p>
+<p>This section will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis may explore differences between years for every state or manually adjust certain features for inflation. Secondly, for ethnicity demographic data, many ambiguous assumptions exist for users filling out surveys. This means there may be inconsistencies with how survey-takers interpret or answer the questions.</p>
 </section>
 <section id="missing-value-analysis" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</h2>

@@ -2,9 +2,9 @@
   {
     "objectID": "index.html",
     "href": "index.html",
-    "title": "Political Party True Impact",
+    "title": "Political Party Impact",
     "section": "",
-    "text": "1 Introduction\nhi",
+    "text": "1 Introduction\nPolitical polarization in the United States has intensified throughout the twenty-first century, with many states and demographics aligning with the same political parties every presidential election. In the United States, there are two major political parties, Democrats and Republicans, and these parties dominate every presidential election cycle. While historically political parties have shown consistent geographic and demographic patterns, do these administrations truly improve the economic outcomes of the groups that vote for them? That is, do presidential administrations lead to better economic outcomes of constituencies that vote for them, or are outcomes broadly similar regardless of which party wins? For example, this project aims to answer a question like “Does a state that consistently votes for the Republican party every presidential election, experience stronger economic outcomes during Republican administrations compared to Democratic administrations?” This project will explore economic statistics at a state-by-state and demographic level from 2001 to 2024 (covering the Bush, Obama, Trump, and Biden administrations) to identify trends or differences for specific groups throughout the years.",
     "crumbs": [
       "<span class='chapter-number'>1</span>  <span class='chapter-title'>Introduction</span>"
     ]
@@ -14,7 +14,7 @@
     "href": "data.html",
     "title": "2  Data",
     "section": "",
-    "text": "2.1 Description",
+    "text": "2.1 Description\nThe data for this project has been pulled from various government databases. The first data set is from the United States Bureau of Economic Analysis and contains information on each states’ GDP, Per capita personal income, and employment from 2001 to 2024 (https://www.bea.gov/data/income-saving/personal-income-by-state). The Bureau of Economic Analysis obtains most of their data from census government survey data or federal administration survey data.\nThe second data set is directly from the United States census and contains median salary values broken down by ethnicity and gender from the years 2000 to 2024 (https://www.census.gov/data/tables/time-series/demo/income-poverty/historical-income-people.html). The United States Census obtains yearly data through randomized surveys to thousands of American households and with those results and government records, estimate population-sized values.\nThe third data set is the Federal Reserve Bank of St. Louis (FRED) and contains information on each states’ median household income throughout the years 2001 to 2024 (https://fred.stlouisfed.org/release/tables?eid=259515&rid=249). The data set has two variables: “State” and “Median Income” with 23 entries reflecting the years 2001 through 2024. The FRED obtains their aggregated data from the United States Census data.\nThe last data set from The Rhode Island Department of Labor and Training and contains the unemployment rate for each state from 2000 to 2024 (https://dlt.ri.gov/labor-market-information). The data set has two columns, “State” and “Unemployment Rate” and 24 entries, spanning the yeras 2000 and 2024. Again, this data was obtained from the United States census.\nThis section will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis may explore differences between years for every state or manually adjust certain features for inflation. Secondly, for ethnicity demographic data, many ambiguous assumptions exist for users filling out surveys. This means there may be inconsistencies with how survey-takers interpret or answer the questions.",
     "crumbs": [
       "<span class='chapter-number'>2</span>  <span class='chapter-title'>Data</span>"
     ]
