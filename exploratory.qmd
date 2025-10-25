@@ -1,0 +1,174 @@
+---
+title: "initial look"
+editor: visual
+---
+
+```{r}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(forcats)
+library(tidytext)
+```
+
+```{r}
+unemployement <- read_csv("unemployement_rate_by_state.csv")
+```
+
+```{r}
+red <- c(
+  "Alabama","Alaska","Arkansas","Idaho","Kansas","Kentucky","Louisiana",
+  "Mississippi","Missouri","Montana","Nebraska","North Dakota","Oklahoma",
+  "South Carolina","South Dakota","Tennessee","Texas","Utah","West Virginia","Wyoming",
+  "Florida", "Indiana", "Ohio", "Iowa"
+)
+
+blue <- c(
+  "California","Connecticut","Delaware","Maine","Hawaii","Illinois","Maryland",
+  "Massachusetts","Minnesota","New Jersey","New York","Oregon","Rhode Island",
+  "Vermont","Washington", "Colorado", "Virginia", "New Mexico", "New Hampshire", "District of Columbia"
+)
+
+swing <- setdiff(state.name, union(red, blue))
+
+biden <- unemployement |> mutate(difference = `2024` - `2021`,
+                                 average = (`2024` + `2023` + `2022` + `2021`)/4) |> pivot_longer(cols = c(`2024`,`2021`), names_to = "year", values_to = "value") |>
+  mutate(Vote = case_when(
+    State %in% red ~ "Republican",
+    State %in% blue ~ "Democrat",
+    State %in% swing ~ "Swing",
+    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Biden") |> distinct()
+
+trump <- unemployement |> mutate(difference = `2020` - `2017`,
+                                 average = (`2020` + `2019` + `2018` + `2017`)/4) |> pivot_longer(cols = c(`2020`,`2017`), names_to = "year", values_to = "value") |>
+  mutate(Vote = case_when(
+    State %in% red ~ "Republican",
+    State %in% blue ~ "Democrat",
+    State %in% swing ~ "Swing",
+    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Trump") |> distinct()
+
+obama <- unemployement |> mutate(difference = `2016` - `2009`,
+                                 average = (`2016` + `2015` + `2014` + `2013`+`2012` + `2011` + `2010` + `2009`)/8) |> pivot_longer(cols = c(`2016`,`2009`), names_to = "year", values_to = "value") |>
+  mutate(Vote = case_when(
+    State %in% red ~ "Republican",
+    State %in% blue ~ "Democrat",
+    State %in% swing ~ "Swing",
+    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Obama") |> distinct()
+
+bush <- unemployement |> mutate(difference = `2008` - `2001`,
+                                 average = (`2008` + `2007` + `2006` + `2005`+`2004` + `2003` + `2002` + `2001`)/8) |> pivot_longer(cols = c(`2008`,`2001`), names_to = "year", values_to = "value") |>
+  mutate(Vote = case_when(
+    State %in% red ~ "Republican",
+    State %in% blue ~ "Democrat",
+    State %in% swing ~ "Swing",
+    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Bush") |> distinct()
+
+```
+
+```{r}
+#| fig.height: 15
+total <- rbind(biden, bush, obama, trump)
+
+total <- total |>
+  mutate(Administration = factor(
+    Administration,
+    levels = c("Bush", "Obama", "Trump", "Biden")  
+  )) |> mutate(State_in_panel = reorder_within(State, average, Administration))
+
+total |> ggplot(aes(x = average, y = State_in_panel, color = Vote)) + geom_point() +
+  facet_wrap(~Administration, scales = "free_y") + scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue",
+      "Swing"      = "purple",
+      "United States" = "gray"
+    )) + scale_y_reordered() + labs(y = "State", x = "Average Unemployement Rate",
+                                    title = "Average Unemployement Rate Throughout 21st Century Administrations")
+
+```
+
+```{r}
+#| fig.height: 15
+
+total2 <- total |>
+  mutate(Administration = factor(
+    Administration,
+    levels = c("Bush", "Obama", "Trump", "Biden")  
+  )) |> mutate(State_in_panel = reorder_within(State, difference, Administration))
+
+total2 |> ggplot(aes(x = difference, y = State_in_panel, color = Vote)) + geom_point() +
+  facet_wrap(~Administration, scales = "free_y") + scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue",
+      "Swing"      = "purple",
+      "United States" = "gray"
+    )) + scale_y_reordered() + labs(y = "State", x = "Difference in Unemployement",
+                                    title = "Difference in Unemployement Throughout 21st Century Administrations", caption = "Difference calculated as last year in office minus first year in office (smaller values show decline in unemployement throughout years)")
+```
+
+
+```{r}
+
+safe_red_always <- c(
+  "Alabama","Alaska","Arkansas","Idaho","Kansas","Kentucky","Louisiana",
+  "Mississippi","Missouri","Montana","Nebraska","North Dakota","Oklahoma",
+  "South Carolina","South Dakota","Tennessee","Texas","Utah","West Virginia","Wyoming"
+)
+
+always_blue <- c(
+  "California","Connecticut","Delaware","Hawaii","Illinois","Maine",
+  "Maryland","Massachusetts","Minnesota","New Jersey","New York",
+  "Oregon","Rhode Island","Vermont","Washington"
+)
+
+red_every_election <- unemployement |> filter(State %in% safe_red_always) |> 
+  pivot_longer(cols = `2024`:`2000`, names_to = "year", values_to = "value") |>
+  mutate(Party = "Republican")
+
+red_every_election$year <- as.Date(red_every_election$year, format = "%Y")
+
+blue_every_election <- unemployement |> filter(State %in% always_blue) |>
+  pivot_longer(cols = `2024`:`2000`, names_to = "year", values_to = "value") |>
+  mutate(Party = "Democratic") 
+
+blue_every_election$year <- as.Date(blue_every_election$year, format = "%Y") 
+
+
+blue_every_election <- blue_every_election |> 
+  mutate(year = floor_date(year, unit = "year")) 
+
+
+red_every_election <- red_every_election |> 
+  mutate(year = floor_date(year, unit = "year"))
+```
+
+```{r}
+ggplot() +
+  # (optional) faint state lines for context
+  geom_line(data = blue_every_election,
+            aes(x = year, y = value, group = State),
+            alpha = 0.15, color = "blue") +
+  geom_line(data = red_every_election,
+            aes(x = year, y = value, group = State),
+            alpha = 0.15, color = "red") +
+
+  # one LOESS per group, overlapped
+  geom_smooth(data = blue_every_election,
+              aes(x = year, y = value, group = 1),
+              method = "loess", span = 0.3, se = FALSE,
+              color = "blue", linewidth = 1.2) +
+  geom_smooth(data = red_every_election,
+              aes(x = year, y = value, group = 1),
+              method = "loess", span = 0.3, se = FALSE,
+              color = "red", linewidth = 1.2) +
+
+  labs(title = "U.S. Unemployement Rates", x = NULL, y = "Rate") +
+  theme_grey(base_size = 16) +
+  theme(legend.position = "none")
+
+```
+
+
+
+
