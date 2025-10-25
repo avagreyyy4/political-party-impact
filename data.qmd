@@ -2,7 +2,7 @@
 
 ## Description
 
-The data for this project has been pulled from various government databases. The first dataset is from the United States census and contains median salary values broken down by ethnicity and gender from the years 2000 to 2024 (https://www.census.gov/data/tables/time-series/demo/income-poverty/historical-income-people.html). The United States Census obtains yearly data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values. 
+The data for this project has been pulled from various government databases. The first dataset is from the United States census and contains median salary values broken down by ethnicity and gender from the years 2000 to 2024 [Text to show](https://www.census.gov/data/tables/time-series/demo/income-poverty/historical-income-people.html). The United States Census obtains yearly data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values. 
 
 
 The second dataset is from the United States Bureau of Economic Analysis and contains information on each state's GDP, per capita personal income, and employment from 2001 to 2024 (https://www.bea.gov/data/income-saving/personal-income-by-state). The Bureau of Economic Analysis obtains most of its data from Census Bureau surveys or federal administration surveys.  
