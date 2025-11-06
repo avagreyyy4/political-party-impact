@@ -1,0 +1,25 @@
+---
+title: "exploratory_state_factors"
+format: html
+editor: visual
+---
+```{r, message = FALSE}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(forcats)
+library(tidytext)
+library(scales)
+library(lubridate)
+library(stringr)
+library(readxl)
+```
+
+```{r}
+state_data <- read_csv("data/state_factors.csv")
+```
+
+```{r}
+state_data <- state_data |> filter(!is.na(LineCode)) |>
+  select(-`1998`, -`1999`, -`2000`)
+```

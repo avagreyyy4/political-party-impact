@@ -1,0 +1,109 @@
+---
+title: "Gender Factors"
+format: html
+editor: visual
+---
+
+```{r, message = FALSE}
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(forcats)
+library(tidytext)
+library(scales)
+library(lubridate)
+library(stringr)
+```
+
+```{r}
+gender_income <- read_csv("data/median_income_region_gender.csv")
+```
+
+
+Looking at gender median income
+
+```{r}
+gender_income$Year <- gsub("\\([^)]*\\)", "", as.character(gender_income$Year))
+
+gender_income_US$Year <- as.Date(gender_income_US$Year, format = "%Y")
+
+gender_income_US <- gender_income |>
+  filter(Region == "US Average") |> 
+  mutate(
+    Year = ymd(paste0(Year, "-01-01"))
+  )
+
+gender_income_US <- gender_income_US |> 
+  pivot_longer(
+    cols = c(`Male_Median_Income (2024 $)`, `Female_Median_Income (2024 $)`), 
+    names_to = "Gender_Median_Income",                      
+    values_to = "Median_Income"                       
+  )
+```
+
+
+```{r}
+gender_income_US |> ggplot()+
+  geom_line(aes(x = Year, y = `Median_Income`, color = Gender_Median_Income))
+```
+
+```{r}
+gender_income_US_female <- gender_income_US |>
+  filter(Gender_Median_Income == "Female_Median_Income (2024 $)") |>
+  filter(Year > '2000-01-01')
+
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(tibble)
+
+# Example periods
+periods <- tribble(
+  ~xmin,                ~xmax,                ~fill,
+  ymd("2001-01-01"),    ymd("2009-01-01"),    "red",
+  ymd("2009-01-01"),    ymd("2017-01-01"),    "blue",
+  ymd("2017-01-01"),    ymd("2021-01-01"),    "red",
+  ymd("2021-01-01"),    ymd("2025-01-01"),    "blue"  # covers through 2024
+)
+
+female <- ggplot(gender_income_US_female, aes(x = Year, y = Median_Income)) +
+  # background bands (draw first so they sit behind)
+  geom_rect(data = periods,
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf, fill = fill),
+            inherit.aes = FALSE, alpha = 0.12, color = NA) +
+  scale_fill_identity() +  # use provided color names; hide legend
+  geom_line(size = 0.8) + scale_x_continuous(breaks = seq(2001, 2024, 1))
+```
+
+```{r}
+gender_income_US_male <- gender_income_US |>
+  filter(Gender_Median_Income == "Male_Median_Income (2024 $)") |>
+  filter(Year > '2000-01-01')
+
+library(dplyr)
+library(ggplot2)
+library(lubridate)
+library(tibble)
+
+# Example periods
+periods <- tribble(
+  ~xmin,                ~xmax,                ~fill,
+  ymd("2001-01-01"),    ymd("2009-01-01"),    "red",
+  ymd("2009-01-01"),    ymd("2017-01-01"),    "blue",
+  ymd("2017-01-01"),    ymd("2021-01-01"),    "red",
+  ymd("2021-01-01"),    ymd("2025-01-01"),    "blue"  # covers through 2024
+)
+
+male <- ggplot(gender_income_US_male, aes(x = Year, y = Median_Income)) +
+  # background bands (draw first so they sit behind)
+  geom_rect(data = periods,
+            aes(xmin = xmin, xmax = xmax, ymin = -Inf, ymax = Inf, fill = fill),
+            inherit.aes = FALSE, alpha = 0.12, color = NA) +
+  scale_fill_identity() +  # use provided color names; hide legend
+  geom_line(size = 0.8) + scale_x_continuous(breaks = seq(2001, 2024, 1))
+```
+
+```{r}
+female
+male
+```
