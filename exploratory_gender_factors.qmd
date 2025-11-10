@@ -19,11 +19,12 @@ library(stringr)
 gender_income <- read_csv("data/median_income_region_gender.csv")
 ```
 
-
 Looking at gender median income
 
 ```{r}
 gender_income$Year <- gsub("\\([^)]*\\)", "", as.character(gender_income$Year))
+
+gender_income_US <- gender_income|> filter(Region == 'US Average')
 
 gender_income_US$Year <- as.Date(gender_income_US$Year, format = "%Y")
 
@@ -40,7 +41,6 @@ gender_income_US <- gender_income_US |>
     values_to = "Median_Income"                       
   )
 ```
-
 
 ```{r}
 gender_income_US |> ggplot()+

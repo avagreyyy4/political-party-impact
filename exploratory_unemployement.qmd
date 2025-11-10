@@ -18,7 +18,8 @@ library(stringr)
 unemployement <- read_csv("data/unemployement_rate_by_state.csv")
 ```
 
-There are 16 states that voted blue in every presidential election since 2000, and there are 20 states that have voted red in every presidential election since 2000. 
+There are 16 states that voted blue in every presidential election since 2000, and there are 20 states that have voted red in every presidential election since 2000.
+
 ```{r}
 consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
 
@@ -33,33 +34,33 @@ unemployement <- unemployement |> filter(
 ```
 
 ```{r}
-biden <- unemployement |> mutate(difference = `2024` - `2021`,
+biden <- unemployement |> mutate(percent_change = (`2024` - `2021`)/`2021`,
                                  average = (`2024` + `2023` + `2022` + `2021`)/4) |> pivot_longer(cols = c(`2024`,`2021`), names_to = "year", values_to = "value") |>
   mutate(Vote = case_when(
     State %in% consistent_red ~ "Republican",
     State %in% consistent_blue ~ "Democrat",
-    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Biden") |> distinct()
+    State == 'United States' ~ "United States")) |> select(State, percent_change, average, Vote) |> mutate(Administration = "Biden") |> distinct()
 
-trump <- unemployement |> mutate(difference = `2020` - `2017`,
+trump <- unemployement |> mutate(percent_change = (`2020` - `2017`)/`2017`,
                                  average = (`2020` + `2019` + `2018` + `2017`)/4) |> pivot_longer(cols = c(`2020`,`2017`), names_to = "year", values_to = "value") |>
   mutate(Vote = case_when(
     State %in% consistent_red ~ "Republican",
     State %in% consistent_blue ~ "Democrat",
-    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Trump") |> distinct()
+    State == 'United States' ~ "United States")) |> select(State, percent_change, average, Vote) |> mutate(Administration = "Trump") |> distinct()
 
-obama <- unemployement |> mutate(difference = `2016` - `2009`,
+obama <- unemployement |> mutate(percent_change = (`2016` - `2009`)/`2009`,
                                  average = (`2016` + `2015` + `2014` + `2013`+`2012` + `2011` + `2010` + `2009`)/8) |> pivot_longer(cols = c(`2016`,`2009`), names_to = "year", values_to = "value") |>
   mutate(Vote = case_when(
     State %in% consistent_red ~ "Republican",
     State %in% consistent_blue ~ "Democrat",
-    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Obama") |> distinct()
+    State == 'United States' ~ "United States")) |> select(State, percent_change, average, Vote) |> mutate(Administration = "Obama") |> distinct()
 
-bush <- unemployement |> mutate(difference = `2008` - `2001`,
+bush <- unemployement |> mutate(percent_change = (`2008` - `2001`)/`2001`,
                                  average = (`2008` + `2007` + `2006` + `2005`+`2004` + `2003` + `2002` + `2001`)/8) |> pivot_longer(cols = c(`2008`,`2001`), names_to = "year", values_to = "value") |>
   mutate(Vote = case_when(
     State %in% consistent_red ~ "Republican",
     State %in% consistent_blue ~ "Democrat",
-    State == 'United States' ~ "United States")) |> select(State, difference, average, Vote) |> mutate(Administration = "Bush") |> distinct()
+    State == 'United States' ~ "United States")) |> select(State, percent_change, average, Vote) |> mutate(Administration = "Bush") |> distinct()
 ```
 
 ```{r}
@@ -80,8 +81,8 @@ total |> ggplot(aes(x = average, y = State_in_panel, color = Vote)) + geom_point
       "United States" = "gray"
     )) + scale_y_reordered() + labs(y = "State", x = "Average Unemployement Rate",
                                     title = "Average Unemployement Rate Throughout 21st Century Administrations")
-
 ```
+
 
 ```{r}
 #| fig.height: 15
@@ -90,16 +91,16 @@ total2 <- total |>
   mutate(Administration = factor(
     Administration,
     levels = c("Bush", "Obama", "Trump", "Biden")  
-  )) |> mutate(State_in_panel = reorder_within(State, difference, Administration))
+  )) |> mutate(State_in_panel = reorder_within(State, percent_change, Administration))
 
-total2 |> ggplot(aes(x = difference, y = State_in_panel, color = Vote)) + geom_point() +
+total2 |> ggplot(aes(x = percent_change, y = State_in_panel, color = Vote)) + geom_point() +
   facet_wrap(~Administration, scales = "free_y") + scale_color_manual(
     values = c(
       "Republican" = "red",
       "Democrat"   = "blue",
       "United States" = "gray"
-    )) + scale_y_reordered() + labs(y = "State", x = "Difference in Unemployement",
-                                    title = "Difference in Unemployement Throughout 21st Century Administrations", caption = "Difference calculated as last year in office minus first year in office (smaller values show decline in unemployement throughout years)")
+    )) + scale_y_reordered() + labs(y = "State", x = "percent_change in Unemployement",
+                                    title = "percent_change in Unemployement Throughout 21st Century Administrations", caption = "percent_change calculated as last year in office minus first year in office (smaller values show decline in unemployement throughout years)")
 ```
 
 ```{r}
@@ -137,41 +138,194 @@ red_every_election <- red_every_election |>
   mutate(year = floor_date(year, unit = "year"))
 ```
 
-```{r}
-ggplot() +
-  geom_line(data = blue_every_election,
-            aes(x = year, y = value, group = State),
-            alpha = 0.5, color = "blue") +
 
-  labs(title = "U.S. Unemployement Rates", x = NULL, y = "Rate") +
-  theme_grey(base_size = 16) +
-  theme(legend.position = "none") +
-  scale_x_date(
-  limits = as.Date(c("2000-01-01", "2024-12-31")),
-  date_breaks = "4 years",
-  date_labels = "%Y",
-  expand = c(0, 0)   
-)
+```{r}
+unemployement_dif_biden <- total |> mutate(state_lower = tolower(State)) |> 
+  filter(Administration == "Biden")
+us_map <- map_data("state") 
+
+plot_df_biden <- us_map |>
+  left_join(unemployement_dif_biden, by = c("region" = "state_lower"))
+
+ggplot(plot_df_biden, aes(long, lat, group = group, fill = percent_change)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  scale_fill_distiller(
+  name = "Change", type = "div", palette = "RdBu", direction = -1,
+  na.value = "grey90"
+)+
+  labs(title = "Your Metric by State", x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+```
+
+
+```{r}
+unemployement_dif_trump <- total |> mutate(state_lower = tolower(State)) |> 
+  filter(Administration == "Trump")
+us_map <- map_data("state") 
+
+plot_df_trump <- us_map |>
+  left_join(unemployement_dif_trump, by = c("region" = "state_lower"))
+
+ggplot(plot_df_trump, aes(long, lat, group = group, fill = percent_change)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  scale_fill_distiller(
+  name = "Change", type = "div", palette = "RdBu", direction = 1,
+  na.value = "grey90"
+)+
+  labs(title = "Your Metric by State", x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+unemployement_dif_obama <- total |> mutate(state_lower = tolower(State)) |> 
+  filter(Administration == "Obama")
+us_map <- map_data("state") 
+
+plot_df_obama <- us_map |>
+  left_join(unemployement_dif_obama, by = c("region" = "state_lower"))
+
+ggplot(plot_df_obama, aes(long, lat, group = group, fill = percent_change)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  scale_fill_distiller(
+  name = "Change", type = "div", palette = "RdBu", direction = -1,
+  na.value = "grey90"
+)+
+  labs(title = "Your Metric by State", x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+unemployement_dif_bush <- total |> mutate(state_lower = tolower(State)) |> 
+  filter(Administration == "Bush")
+us_map <- map_data("state") 
+
+plot_df_bush <- us_map |>
+  left_join(unemployement_dif_bush, by = c("region" = "state_lower"))
+
+ggplot(plot_df_bush, aes(long, lat, group = group, fill = percent_change)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  scale_fill_distiller(
+  name = "Change", type = "div", palette = "RdBu", direction = 1,
+  na.value = "grey90"
+)+
+  labs(title = "Your Metric by State", x = NULL, y = NULL) +
+  theme_minimal() +
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+# total_map: joined once for all admins (as in previous step)
+pc <- total_map$percent_change
+pc[is.infinite(pc)] <- NA
+lim <- max(abs(pc), na.rm = TRUE)
+
+ggplot(total_map, aes(long, lat, group = group, fill = percent_change)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  facet_wrap(~ Administration, ncol = 2) +
+  scale_fill_gradient2(
+    name = "Change",
+    low = "darkgreen", mid = "white", high = "red",  # GREEN low → RED high
+    midpoint = 0,
+    limits = c(-lim, lim),
+    labels = scales::label_percent(accuracy = 1),
+    oob = scales::squish, na.value = "grey90"
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(panel.grid = element_blank(),
+        axis.text = element_blank(), axis.ticks = element_blank())
+
+```
+
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+bins <- total %>%
+  group_by(Administration) %>%
+  mutate(
+    # 7 quantile bins; 1=lowest, 7=highest within admin
+    q = ntile(percent_change, 7)
+  ) %>%
+  ungroup()
+
+plot_df <- bins %>%
+  mutate(state_lower = tolower(State)) %>%
+  inner_join(map_data("state"), by = c("state_lower" = "region"))
+
+ggplot(plot_df, aes(long, lat, group = group, fill = q)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  facet_wrap(~ Administration, ncol = 2) +
+  scale_fill_stepsn(
+    name = "Within-admin rank",
+    colors = c("#006d2c","#31a354","#74c476","#ffffe5","#fcbba1","#fb6a4a","#cb181d"),
+    breaks = 1:7, limits = c(1,7), show.limits = TRUE
+  ) +
+  labs(title = "State unemployment change ranks by administration",
+       subtitle = "Green = lowest changes in that admin; Red = highest") +
+  theme_minimal(base_size = 12) +
+  theme(panel.grid = element_blank(),
+        axis.text = element_blank(), axis.ticks = element_blank())
 
 ```
 
 ```{r}
-ggplot() +
-  geom_line(data = red_every_election,
-            aes(x = year, y = value, group = State),
-            alpha = 0.5, color = "red") +
+library(dplyr)
+library(ggplot2)
+library(scales)
 
-  labs(title = "U.S. Unemployement Rates", x = NULL, y = "Rate") +
-  theme_grey(base_size = 16) +
-  theme(legend.position = "none") +
-  scale_x_date(
-  limits = as.Date(c("2000-01-01", "2024-12-31")),
-  date_breaks = "4 years",
-  date_labels = "%Y",
-  expand = c(0, 0)   
-)
+# total: State, Administration, percent_change (e.g., 0.12 = +12%)
+# 1) Robust within-admin standardization (median/MAD)
+std <- total %>%
+  group_by(Administration) %>%
+  mutate(
+    med = median(percent_change, na.rm = TRUE),
+    mad = mad(percent_change, constant = 1.4826, na.rm = TRUE),
+    z_admin = (percent_change - med) / mad
+  ) %>%
+  ungroup()
+
+# 2) Join to polygons once
+us_map <- map_data("state")
+plot_df <- std %>%
+  mutate(state_lower = tolower(State)) %>%
+  inner_join(us_map, by = c("state_lower" = "region"))
+
+# 3) Winsorize and plot with a shared diverging scale
+lim <- 3   # cap to ±3 MADs for readable color
+plot_df$z_clip <- pmax(pmin(plot_df$z_admin,  lim), -lim)
+
+ggplot(plot_df, aes(long, lat, group = group, fill = z_clip)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  facet_wrap(~ Administration, ncol = 2) +
+  scale_fill_gradient2(
+    name = "Relative (z)",
+    low = "darkgreen", mid = "white", high = "red", midpoint = 0,
+    limits = c(-lim, lim), oob = squish
+  ) +
+  labs(title = "State unemployment change, standardized within each administration",
+       subtitle = "Red = higher vs peers in same admin; Green = lower vs peers") +
+  theme_minimal(base_size = 12) +
+  theme(panel.grid = element_blank(),
+        axis.text = element_blank(), axis.ticks = element_blank())
 
 ```
 
+Seems for republicans states specifically in the middle country do better: idaho, wyoming, nebraska, oklahoma etc. Look into these states
 
-
+For democrats: costal cities do better 

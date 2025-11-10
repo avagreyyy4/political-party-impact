@@ -16,10 +16,109 @@ library(readxl)
 ```
 
 ```{r}
-state_data <- read_csv("data/state_factors.csv")
+#state_data <- read_csv("data/state_factors.csv")
+state_income <- read_csv("data/all_states_median_income.csv")
 ```
 
 ```{r}
-state_data <- state_data |> filter(!is.na(LineCode)) |>
-  select(-`1998`, -`1999`, -`2000`)
+#state_data <- state_data |> filter(!is.na(LineCode)) |>
+  #select(-`1998`, -`1999`, -`2000`)
 ```
+
+
+
+```{r}
+consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
+
+consistent_red <- c("Alaska", "Alabama", "Arkansas", "Idaho", "Kansas", "Kentucky", "Louisiana", "Missouri", "Mississippi", "Montana", "Nebraska", "North Dakota", "Oklahoma", "South Carolina", "South Dakota", "Tennesse", "Texas", "Utah", "Wyoming", "West Virginia")
+
+all_consistent <- union(consistent_blue, consistent_red)
+
+state_income <- state_income|>
+  filter(observation_date >= '2000-01-01') |>
+  rename("Oklahoma" = "MEHOINUSOKA672N",
+         "Utah" = "MEHOINUSUTA672N")|>
+  pivot_longer("United States":"Wyoming",
+               names_to = "State",
+               values_to = "median_income")|>
+  filter(State %in% all_consistent)
+
+state_income$observation_date <- as.Date(state_income$observation_date)
+```
+
+```{r}
+#dot-plot seeing difference values
+state_income_biden <- state_income |>
+  filter(observation_date == '2021-01-01' | observation_date == '2024-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
+  summarise(start = first(median_income),
+            end = last(median_income),
+            difference = start-end,
+            pct_change = difference/start,
+            .groups = "drop") |> mutate(
+              Vote = case_when(
+                State %in% consistent_blue ~ "Democrat",
+                State %in% consistent_red ~ "Republican"
+              )
+            )
+
+
+state_income_biden |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
+  geom_point()
+```
+
+```{r}
+state_income_trump <- state_income |>
+  filter(observation_date == '2017-01-01' | observation_date == '2021-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
+  summarise(start = first(median_income),
+            end = last(median_income),
+            difference = start-end,
+            pct_change = difference/start,
+            .groups = "drop") |> mutate(
+              Vote = case_when(
+                State %in% consistent_blue ~ "Democrat",
+                State %in% consistent_red ~ "Republican"
+              )
+            )
+
+
+state_income_trump |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
+  geom_point()
+```
+
+```{r}
+state_income_obama <- state_income |>
+  filter(observation_date == '2016-01-01' | observation_date == '2009-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
+  summarise(start = first(median_income),
+            end = last(median_income),
+            difference = start-end,
+            pct_change = difference/start,
+            .groups = "drop") |> mutate(
+              Vote = case_when(
+                State %in% consistent_blue ~ "Democrat",
+                State %in% consistent_red ~ "Republican"
+              )
+            )
+
+
+state_income_obama |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
+  geom_point()
+```
+```{r}
+state_income_bush <- state_income |>
+  filter(observation_date == '2001-01-01' | observation_date == '2008-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
+  summarise(start = first(median_income),
+            end = last(median_income),
+            difference = start-end,
+            pct_change = difference/start,
+            .groups = "drop") |> mutate(
+              Vote = case_when(
+                State %in% consistent_blue ~ "Democrat",
+                State %in% consistent_red ~ "Republican"
+              )
+            )
+
+
+state_income_bush |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
+  geom_point()
+```
+
