@@ -21,19 +21,21 @@ state_income <- read_csv("data/all_states_median_income.csv")
 ```
 
 ```{r}
-#state_data <- state_data |> filter(!is.na(LineCode)) |>
-  #select(-`1998`, -`1999`, -`2000`)
-```
-
-
-
-```{r}
 consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
 
 consistent_red <- c("Alaska", "Alabama", "Arkansas", "Idaho", "Kansas", "Kentucky", "Louisiana", "Missouri", "Mississippi", "Montana", "Nebraska", "North Dakota", "Oklahoma", "South Carolina", "South Dakota", "Tennesse", "Texas", "Utah", "Wyoming", "West Virginia")
 
 all_consistent <- union(consistent_blue, consistent_red)
 
+to_dates <- function(yrs) as.Date(sprintf("%d-01-01", yrs))
+
+biden_years <- to_dates(2021:2024)
+trump_years <- to_dates(2017:2020)
+obama_years <- to_dates(2009:2016)
+bush_years  <- to_dates(2001:2008)
+```
+
+```{r}
 state_income <- state_income|>
   filter(observation_date >= '2000-01-01') |>
   rename("Oklahoma" = "MEHOINUSOKA672N",
@@ -42,83 +44,179 @@ state_income <- state_income|>
                names_to = "State",
                values_to = "median_income")|>
   filter(State %in% all_consistent)
-
 state_income$observation_date <- as.Date(state_income$observation_date)
+
+```
+
+
+```{r}
+state_income2 <- state_income|>
+  mutate(
+    vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"),
+    administration = case_when(
+      observation_date %in% biden_years ~ "Biden",
+      observation_date %in% trump_years ~ "Trump",
+      observation_date %in% obama_years ~ "Obama",
+      observation_date %in% bush_years ~ "Bush"
+    ),
+    vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"
+    )) |>
+  group_by(administration, State)|>
+  reframe(
+    starting_median = median_income[which.min(observation_date)],
+    ending_median = median_income[which.max(observation_date)],
+    difference = ending_median - starting_median,
+    pct_change = difference/starting_median,
+    vote=vote
+    )|> mutate(
+  dif_from_us = difference - case_when(
+      administration == "Biden" ~ 2460,
+      administration == "Trump" ~  -90,
+      administration == "Obama" ~ 5310,
+      administration == "Bush"  ~  4870,
+      TRUE ~ NA_real_
+    ),
+    dif_from_us = round(dif_from_us, 3))
+  
+  
 ```
 
 ```{r}
-#dot-plot seeing difference values
-state_income_biden <- state_income |>
-  filter(observation_date == '2021-01-01' | observation_date == '2024-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
-  summarise(start = first(median_income),
-            end = last(median_income),
-            difference = start-end,
-            pct_change = difference/start,
-            .groups = "drop") |> mutate(
-              Vote = case_when(
-                State %in% consistent_blue ~ "Democrat",
-                State %in% consistent_red ~ "Republican"
-              )
-            )
+adm_dot_plot <- state_income2|>
+  mutate(administration = factor(
+    administration,
+    levels = c("Bush", "Obama", "Trump", "Biden"))) 
 
 
-state_income_biden |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
-  geom_point()
+adm_dot_plot|> mutate(State_in_panel = reorder_within(State, 
+                                         dif_from_us, 
+                                         administration)) |>
+  ggplot(aes(x = dif_from_us, y = State_in_panel, color = vote)) + geom_point() +
+  facet_wrap(~administration, scales = "free_y") + scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue",
+      "United States" = "gray"
+    )) + scale_y_reordered()
 ```
 
 ```{r}
-state_income_trump <- state_income |>
-  filter(observation_date == '2017-01-01' | observation_date == '2021-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
-  summarise(start = first(median_income),
-            end = last(median_income),
-            difference = start-end,
-            pct_change = difference/start,
-            .groups = "drop") |> mutate(
-              Vote = case_when(
-                State %in% consistent_blue ~ "Democrat",
-                State %in% consistent_red ~ "Republican"
-              )
-            )
+adm_dot_plot|> mutate(State_in_panel = reorder_within(State, 
+                                         pct_change, 
+                                         administration)) |>
+  ggplot(aes(x = pct_change, y = State_in_panel, color = vote)) + geom_point() +
+  facet_wrap(~administration, scales = "free_y") + scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue",
+      "United States" = "gray"
+    )) + scale_y_reordered()
+```
+#Ask about seeing orderings of states ==> visual or rank variable? 
+```{r}
+mapping <- adm_dot_plot |> mutate(state_lower = tolower(State))
+us_map <- map_data("state") 
 
+mapping_joined <- us_map |>
+  left_join(mapping, by = c("region" = "state_lower"),
+            relationship = "many-to-many")
 
-state_income_trump |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
-  geom_point()
+lim <- max(abs(mapping_joined$dif_from_us), na.rm = TRUE)
+
+four_maps2 <- ggplot(mapping_joined, aes(long, lat, group = group, fill = dif_from_us, rm.na=TRUE)) +
+    geom_polygon(color = "white", linewidth = 0.2) +
+    coord_map("albers", lat0 = 39, lat1 = 45) +
+    facet_wrap(~ administration, ncol = 2) +   # <-- or ~ Administration
+    scale_fill_gradient2(
+        name = "State − US change",
+        low = "red", mid = "white", high = "green",
+        midpoint = 0,
+        limits = c(-lim, lim),
+        oob = squish, na.value = "grey90"
+    ) +
+    theme_minimal(base_size = 12) +
+    theme(
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank()
+    )
+```
+## ask about how to plot this since it seems that certain administrations just had better economic outcomes 
+```{r}
+four_maps2
 ```
 
 ```{r}
-state_income_obama <- state_income |>
-  filter(observation_date == '2016-01-01' | observation_date == '2009-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
-  summarise(start = first(median_income),
-            end = last(median_income),
-            difference = start-end,
-            pct_change = difference/start,
-            .groups = "drop") |> mutate(
-              Vote = case_when(
-                State %in% consistent_blue ~ "Democrat",
-                State %in% consistent_red ~ "Republican"
-              )
-            )
+state_income3 <- state_income|> mutate(vote = case_when(
+  State %in% consistent_blue ~ "Democrat",
+  State %in% consistent_red ~ "Republican")) |> group_by(observation_date, vote)|> 
+  reframe(avg = mean(median_income),
+            Year = observation_date, vote = vote)
 
 
-state_income_obama |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
-  geom_point()
+  state_income3|> ggplot(aes(x = Year, y = avg, color = vote)) + 
+  geom_line() +
+  scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue"))
 ```
+
 ```{r}
-state_income_bush <- state_income |>
-  filter(observation_date == '2001-01-01' | observation_date == '2008-01-01') |> group_by(State) |> arrange(observation_date, .by_group = TRUE)|>
-  summarise(start = first(median_income),
-            end = last(median_income),
-            difference = start-end,
-            pct_change = difference/start,
-            .groups = "drop") |> mutate(
-              Vote = case_when(
-                State %in% consistent_blue ~ "Democrat",
-                State %in% consistent_red ~ "Republican"
-              )
-            )
+library(dplyr)
+library(lubridate)
+library(broom)
+library(ggplot2)
+library(scales)
 
+# 1) Start from your data
+series <- state_income3 %>%
+  mutate(year = year(Year),
+         period = case_when(
+           year %in% 2011:2016 ~ "2011–2016",
+           year %in% 2017:2019 ~ "2017–20219",
+           TRUE ~ NA_character_
+         ))
 
-state_income_bush |> ggplot(aes(x = difference, y = fct_reorder(State, difference), color = Vote)) +
-  geom_point()
+# 2) Fit OLS per (party × period) and build segment endpoints
+lines_df <- series %>%
+  filter(!is.na(period)) %>%
+  group_by(vote, period) %>%
+  do({
+    m  <- lm(avg ~ year, data = .)
+    cf <- coef(m)                 # intercept, slope
+    x0 <- min(.$year);  x1 <- max(.$year)
+    y0 <- cf[1] + cf[2]*x0; y1 <- cf[1] + cf[2]*x1
+    tibble(intercept = cf[1], slope = cf[2],
+           x0 = as.Date(paste0(x0, "-01-01")),
+           x1 = as.Date(paste0(x1, "-01-01")),
+           y0 = y0, y1 = y1)
+  }) %>%
+  ungroup() %>%
+  mutate(slope_lab = paste0(vote, " ", period, " — ",
+                            dollar(slope, accuracy = 1), "/yr"))
+
+# 3) Plot: your colored lines + black slope overlays
+slope_plot <- ggplot(state_income3, aes(x = Year, y = avg, color = vote)) +
+  geom_line(size = 0.9) +
+  scale_color_manual(values = c(Republican = "red", Democrat = "blue")) +
+  geom_segment(data = lines_df,
+               aes(x = x0, xend = x1, y = y0, yend = y1, linetype = slope_lab),
+               inherit.aes = FALSE, color = "black", linewidth = 1.2) +
+  labs(x = "Year", y = "avg", color = "vote",
+       linetype = "Slope lines (value = $/yr)") +
+  theme_minimal()
+
 ```
+
+```{r}
+slope_plot
+```
+
 
