@@ -1,0 +1,687 @@
+---
+title: "looking at various economic factors"
+format: html
+editor: visual
+---
+```{r}
+various_factors <- read_csv("data/state_factors.csv")
+```
+
+```{r}
+various_factors_clean <- various_factors |>
+  mutate(across(`2001`:`2024`, ~na_if(.x, "(NA)")))
+
+various_factors2 <- various_factors_clean |>
+  select(-`1998`, -`1999`, -`2000`) |>
+  filter(!is.na(LineCode)) |>
+  select(-LineCode) |>
+  pivot_longer(
+    cols = `2001`:`2024`,
+    names_to = "Year",
+    values_to = "Value"
+  ) |>
+  pivot_wider(
+    names_from = Description,
+    values_from = Value
+  ) |> rename(
+    "State" = "GeoName",
+    Real_GDP    = `Real GDP (millions of chained 2017 dollars) 1`,
+    Real_PI     = `Real personal income (millions of constant (2017) dollars) 2`,
+    Real_PCE    = `Real PCE (millions of constant (2017) dollars) 3`,
+    GDP         = `Gross domestic product (GDP)`,
+    PI          = `Personal income`,
+    DPI         = `Disposable personal income`,
+    PCE         = `Personal consumption expenditures`,
+    Real_PC_PI  = `Real per capita personal income 4`,
+    Real_PC_PCE = `Real per capita PCE 5`,
+    PC_PI       = `Per capita personal income 6`,
+    PC_DPI      = `Per capita disposable personal income 7`,
+    PC_PCE      = `Per capita personal consumption expenditures (PCE) 8`,
+    RPP         = `Regional price parities (RPPs) 9`,
+    IRPD        = `Implicit regional price deflator 10`,
+    Employment  = `Total employment (number of jobs)`
+    
+  )
+
+```
+
+```{r}
+#various_factors_NA <- various_factors2 |>
+ # rownames_to_column("id") |>
+ # pivot_longer(
+  #  cols = -id,
+  #  names_to = "key",
+  #  values_to = "value"
+ # ) |>
+ # mutate(missing = ifelse(is.na(value), "yes", "no"))
+
+#ggplot(various_factors_NA, aes(x = key, y = fct_rev(id), fill = missing)) +
+  #geom_tile(color = "white") + 
+  #ggtitle("mtcars with NAs added") +
+  #ylab('') + 
+  #scale_fill_viridis_d() + # discrete scale
+  #theme_bw()
+
+```
+
+```{r}
+#library(redav)
+#various_factors3 <- various_factors2|>
+  #select(-State, -Year)
+
+#plot_missing(various_factors3, percent = FALSE)
+```
+
+```{r}
+consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
+
+consistent_red <- c("Alaska", "Alabama", "Arkansas", "Idaho", "Kansas", "Kentucky", "Louisiana", "Missouri", "Mississippi", "Montana", "Nebraska", "North Dakota", "Oklahoma", "South Carolina", "South Dakota", "Tennesse", "Texas", "Utah", "Wyoming", "West Virginia", "United States")
+
+all_consistent <- union(consistent_blue, consistent_red)
+
+to_dates <- function(yrs) as.Date(sprintf("%d-01-01", yrs))
+
+biden_years <- as.character(2021:2024)
+trump_years <- as.character(2017:2020)
+obama_years <- as.character(2009:2016)
+bush_years  <- as.character(2001:2008)
+```
+
+
+```{r}
+various_factors_exp <- various_factors2|>
+  select(-IRPD, -Real_PI, -Real_PC_PI, -RPP, -Real_PC_PCE, -Real_PCE) |>
+  filter(State %in% all_consistent) |>
+  select(GeoFips, State, Year, Real_GDP, PC_PI, PC_DPI, PC_PCE)|>
+  mutate(across(c(Real_GDP, PC_PI, PC_DPI, PC_PCE), ~ as.numeric(.)))|>
+  mutate(administration = case_when(
+    Year %in% biden_years ~ "Biden",
+    Year %in% trump_years ~ "Trump",
+    Year %in% obama_years ~ "Obama",
+    Year %in% bush_years ~ "Bush"
+  ),
+  vote = case_when(
+    State %in% consistent_red ~ "Republican",
+    State %in% consistent_blue ~ "Democrat"
+  ),
+  presidental_party = case_when(
+    administration == "Biden" | administration == "Obama" ~ "Democrat",
+    administration == "Trump" | administration == "Bush" ~ "Republican"
+  ),
+  Date = ymd(paste0(Year, "-01-01")))  |>
+  group_by(administration, State) |>
+  arrange(Date, .by_group = TRUE) |>
+  reframe(
+    start_GDP     = first(Real_GDP),
+    end_GDP       = last(Real_GDP),
+    dif_GDP       = end_GDP - start_GDP,
+
+    start_PC_PI   = first(PC_PI),
+    end_PC_PI     = last(PC_PI),
+    dif_PC_PI     = end_PC_PI - start_PC_PI,
+
+    start_PC_DPI  = first(PC_DPI),
+    end_PC_DPI    = last(PC_DPI),
+    dif_PC_DPI    = end_PC_DPI - start_PC_DPI,
+
+    start_PC_PCE  = first(PC_PCE),
+    end_PC_PCE    = last(PC_PCE),
+    dif_PC_PCE    = end_PC_PCE - start_PC_PCE,
+
+    vote = first(vote),
+    administration = first(administration),
+    presidental_party = first(presidental_party)
+  )
+
+
+
+US <- various_factors_exp |>
+  filter(State == "United States") |> select(
+    administration, dif_GDP, dif_PC_PI, dif_PC_DPI, dif_PC_PCE
+  )
+```
+
+
+```{r}
+data_ready <- various_factors_exp |>
+  mutate(dif_GDP_US = case_when(
+    administration == "Biden" ~ dif_GDP - 1826028,
+    administration == "Trump" ~ dif_GDP - 672398,
+    administration == "Obama" ~ dif_GDP - 2792562,
+    administration == "Bush" ~ dif_GDP - 2550759
+  ),
+  dif_PC_PI_US = case_when(
+    administration == "Biden" ~ dif_PC_PI - 8512,
+    administration == "Trump" ~ dif_PC_PI - 8145,
+    administration == "Obama" ~ dif_PC_PI - 9667,
+    administration == "Bush" ~ dif_PC_PI - 9306
+    
+  ),
+  dif_PC_DPI_US = case_when(
+    administration == "Biden" ~ dif_PC_DPI - 7851,
+    administration == "Trump" ~ dif_PC_DPI - 8698,
+    administration == "Obama" ~ dif_PC_DPI - 7384,
+    administration == "Bush" ~ dif_PC_DPI - 7640
+  ),
+  dif_PC_PCE_US = case_when(
+    administration == "Biden" ~ dif_PC_PCE - 9960,
+    administration == "Trump" ~ dif_PC_PCE - 2227,
+    administration == "Obama" ~ dif_PC_PCE - 6995,
+    administration == "Bush" ~ dif_PC_PCE - 8226
+  ))|>
+  filter(State != "United States")
+```
+
+```{r}
+library(GGally)
+library(scales)
+
+plot_data_biden <- data_ready |>
+  filter(administration == "Biden") |>
+  mutate(across(
+    c(dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US),
+    scales::rescale
+  )) |>
+  select(
+    dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US,
+    vote    # Republican or Democrat
+  )
+
+
+ggparcoord(
+  data = plot_data_biden,
+  columns = 1:4,
+  groupColumn = "vote",        # key for coloring
+  scale = "globalminmax",
+  title = "Parallel coordinate plot"
+) +
+  scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue"
+    )
+  )
+
+```
+
+
+```{r}
+plot_data_trump <- data_ready |>
+  filter(administration == "Trump") |>
+  mutate(across(
+    c(dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US),
+    scales::rescale
+  )) |>
+  select(
+    dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US,
+    vote    # Republican or Democrat
+  )
+
+
+ggparcoord(
+  data = plot_data_trump,
+  columns = 1:4,
+  groupColumn = "vote",        # key for coloring
+  scale = "globalminmax",
+  title = "Parallel coordinate plot"
+) +
+  scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue"
+    )
+  )
+
+```
+
+```{r}
+plot_data_obama <- data_ready |>
+  filter(administration == "Obama") |>
+  mutate(across(
+    c(dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US),
+    scales::rescale
+  )) |>
+  select(
+    dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US,
+    vote    # Republican or Democrat
+  )
+
+
+ggparcoord(
+  data = plot_data_obama,
+  columns = 1:4,
+  groupColumn = "vote",        # key for coloring
+  scale = "globalminmax",
+  title = "Parallel coordinate plot"
+) +
+  scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue"
+    )
+  )
+
+```
+
+
+```{r}
+plot_data_bush <- data_ready |>
+  filter(administration == "Bush") |>
+  mutate(across(
+    c(dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US),
+    scales::rescale
+  )) |>
+  select(
+    dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US,
+    vote    # Republican or Democrat
+  )
+
+
+ggparcoord(
+  data = plot_data_bush,
+  columns = 1:4,
+  groupColumn = "vote",        # key for coloring
+  scale = "globalminmax",
+  title = "Parallel coordinate plot"
+) +
+  scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue"
+    )
+  )
+
+```
+
+```{r}
+biden_facet <- data_ready %>%
+  filter(administration == "Biden") %>%
+  pivot_longer(starts_with("dif_PC"), names_to="metric", values_to="value") %>%
+  ggplot(aes(x = vote, y = value, fill = vote)) +
+  geom_boxplot(alpha=0.7) +
+  facet_wrap(~ metric, scales = "free_y") +
+  scale_fill_manual(values=c("Democrat"="blue", "Republican"="red")) +
+  theme_bw() +
+  labs(title="Differences from U.S. by Party and Metric")
+```
+
+
+```{r}
+biden_facet
+```
+
+```{r}
+trump_facet <- data_ready %>%
+  filter(administration == "Trump") %>%
+  pivot_longer(starts_with("dif_PC"), names_to="metric", values_to="value") %>%
+  ggplot(aes(x = vote, y = value, fill = vote)) +
+  geom_boxplot(alpha=0.7) +
+  facet_wrap(~ metric, scales = "free_y") +
+  scale_fill_manual(values=c("Democrat"="blue", "Republican"="red")) +
+  theme_bw() +
+  labs(title="Differences from U.S. by Party and Metric")
+
+```
+
+
+```{r}
+trump_facet
+```
+
+```{r}
+data_ready %>% 
+  ggplot(aes(
+    x = dif_PC_PI_US, 
+    y = dif_PC_DPI_US, 
+    color = vote
+  )) +
+  geom_point(size = 2, alpha = 0.8) +
+  facet_wrap(~ administration) +
+  scale_color_manual(
+    values = c(
+      "Republican" = "#D62728",  # red
+      "Democrat"   = "#1F77B4"   # blue
+    )
+  ) +
+  theme_bw() +
+  labs(
+    x = "Per Capita Personal Income Difference (vs US)",
+    y = "Per Capita DPI Difference (vs US)",
+    title = "State Differences in PC Income vs PC DPI by Administration"
+  )
+
+```
+
+```{r}
+scaled_plot_df <- data_ready %>%
+  ungroup() %>%   # important!
+  mutate(across(
+    c(dif_GDP_US, dif_PC_DPI_US), 
+    ~ as.numeric(scale(.))
+  ))
+
+scaled_plot_df %>% 
+  ggplot(aes(
+    x = dif_GDP_US, 
+    y = dif_PC_DPI_US, 
+    color = vote
+  )) +
+  geom_point(size = 2, alpha = 0.8) +
+  facet_wrap(~ administration) +
+  scale_color_manual(
+    values = c(
+      "Republican" = "#D62728",  # red
+      "Democrat"   = "#1F77B4"   # blue
+    )
+  ) +
+  theme_bw() +
+  labs(
+    x = "Scaled GDP")
+```
+
+```{r}
+library(ggfortify)
+
+df <- data_ready %>%
+  ungroup() %>%
+  select(dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US, vote) %>%
+  mutate(across(-vote, scale))
+
+autoplot(
+  prcomp(df %>% select(-vote)),
+  data = df,
+  colour = "vote",
+  frame = TRUE,
+  frame.type = "norm"
+) +
+  scale_color_manual(values=c("Democrat"="#1F77B4", "Republican"="#D62728"))
+
+```
+
+```{r}
+data_ready %>%
+  select(dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US) %>%
+  cor(use="complete.obs") %>%
+  corrplot::corrplot(method="color", addCoef.col="black")
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+library(ggplot2)
+library(dplyr)
+
+# 1. Prepare data
+pca_data <- data_ready %>% 
+  select(presidental_party,
+         dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US) %>%
+  drop_na()
+
+# 2. Scale numeric variables
+X <- pca_data %>% select(-presidental_party)
+X_scaled <- scale(X)
+
+# 3. Run PCA
+pca <- prcomp(X_scaled, center = TRUE, scale. = TRUE)
+
+# 4. PCA scores (points)
+scores <- as.data.frame(pca$x)
+scores$party <- pca_data$presidental_party
+
+# 5. PCA loadings (arrows)
+loadings <- as.data.frame(pca$rotation)
+loadings$variable <- rownames(loadings)
+
+# 6. Plot
+ggplot() +
+  # --- PCA points ---
+  geom_point(data = scores,
+             aes(x = PC1, y = PC2, color = party),
+             size = 3, alpha = 0.8) +
+
+  # --- Arrows for loadings ---
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0,
+                   xend = PC1 * 3, yend = PC2 * 3),
+               arrow = arrow(length = unit(0.2, "cm")),
+               color = "black",
+               inherit.aes = FALSE) +
+
+  # --- Labels for loadings ---
+  geom_text(data = loadings,
+            aes(x = PC1 * 3.2, y = PC2 * 3.2, label = variable),
+            size = 5,
+            inherit.aes = FALSE) +
+
+  scale_color_manual(values = c("Democrat" = "blue",
+                                "Republican" = "red")) +
+
+  theme_bw() +
+  labs(
+    title = "PCA Biplot of State Differences vs US",
+    x = paste0("PC1 (", round(summary(pca)$importance[2,1] * 100, 2), "%)"),
+    y = paste0("PC2 (", round(summary(pca)$importance[2,2] * 100, 2), "%)")
+  )
+
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# 1. Prepare data
+pca_data <- data_ready %>% 
+  select(State, vote,       # <-- use vote instead of presidental_party
+         dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US) %>%
+  drop_na()
+
+# 2. Scale numeric variables
+X <- pca_data %>% select(dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US)
+X_scaled <- scale(X)
+
+# 3. Run PCA
+pca <- prcomp(X_scaled, center = TRUE, scale. = TRUE)
+
+# 4. PCA scores (points)
+scores <- as.data.frame(pca$x)
+scores$vote <- pca_data$vote     # <-- color by vote (Democrat vs Republican)
+scores$State <- pca_data$State   # (optional: useful for labeling)
+
+# 5. PCA loadings (arrows)
+loadings <- as.data.frame(pca$rotation)
+loadings$variable <- rownames(loadings)
+
+# 6. Plot with vote colors
+ggplot() +
+  geom_point(data = scores,
+             aes(x = PC1, y = PC2, color = vote),
+             size = 3, alpha = 0.8) +
+
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0,
+                   xend = PC1 * 3, yend = PC2 * 3),
+               arrow = arrow(length = unit(0.2, "cm")),
+               color = "black",
+               inherit.aes = FALSE) +
+
+  geom_text(data = loadings,
+            aes(x = PC1 * 3.2, y = PC2 * 3.2, label = variable),
+            size = 5,
+            inherit.aes = FALSE) +
+
+  scale_color_manual(values = c(
+    "Democrat" = "blue",
+    "Republican" = "red"
+  )) +
+
+  theme_bw() +
+  labs(
+    title = "PCA Biplot of State Differences vs US (Colored by State Vote)",
+    x = paste0("PC1 (", round(summary(pca)$importance[2,1] * 100, 2), "%)"),
+    y = paste0("PC2 (", round(summary(pca)$importance[2,2] * 100, 2), "%)")
+  )
+
+```
+
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# 1. Prepare data (include State this time)
+pca_data <- data_ready %>% 
+  select(State, vote,
+         dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US) %>%
+  drop_na()
+
+# 2. Scale numeric variables
+X <- pca_data %>% select(-State, -vote)
+X_scaled <- scale(X)
+
+# 3. PCA
+pca <- prcomp(X_scaled, center = TRUE, scale. = TRUE)
+
+# 4. Scores + state names
+scores <- as.data.frame(pca$x)
+scores$vote <- pca_data$vote
+scores$State <- pca_data$State
+
+# 5. Loadings
+loadings <- as.data.frame(pca$rotation)
+loadings$variable <- rownames(loadings)
+
+# 6. Plot with state labels
+ggplot() +
+  geom_point(data = scores,
+             aes(x = PC1, y = PC2, color = vote),
+             size = 3, alpha = 0.8) +
+
+  geom_text(data = scores,
+            aes(x = PC1, y = PC2, label = State, color = vote),
+            size = 3, vjust = -0.8) +
+
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0,
+                   xend = PC1 * 3, yend = PC2 * 3),
+               arrow = arrow(length = unit(0.2, "cm")),
+               color = "black") +
+
+  geom_text(data = loadings,
+            aes(x = PC1 * 3.2, y = PC2 * 3.2, label = variable),
+            size = 5) +
+
+  scale_color_manual(values = c("Democrat"="blue", "Republican"="red")) +
+  theme_bw() +
+  labs(
+    title = "PCA Biplot of State Differences vs US (with State Labels)",
+    x = paste0("PC1 (", round(summary(pca)$importance[2,1]*100,2), "%)"),
+    y = paste0("PC2 (", round(summary(pca)$importance[2,2]*100,2), "%)")
+  )
+
+```
+
+```{r}
+library(ggplot2)
+library(dplyr)
+
+# 1. Prepare data (include State + vote + administration)
+pca_data <- data_ready %>% 
+  select(State, vote, administration,
+         dif_GDP_US, dif_PC_PI_US, dif_PC_DPI_US, dif_PC_PCE_US) %>%
+  drop_na()
+
+# 2. Scale numeric variables
+X <- pca_data %>% select(-State, -vote, -administration)
+X_scaled <- scale(X)
+
+# 3. PCA
+pca <- prcomp(X_scaled, center = TRUE, scale. = TRUE)
+
+# 4. Scores with labels
+scores <- as.data.frame(pca$x)
+scores$vote <- pca_data$vote
+scores$admin <- pca_data$administration
+scores$State <- pca_data$State
+
+# 5. Loadings
+loadings <- as.data.frame(pca$rotation)
+loadings$variable <- rownames(loadings)
+
+# 6. Plot
+ggplot() +
+  # Points
+  geom_point(
+    data = scores,
+    aes(x = PC1, y = PC2, color = vote, shape = admin),
+    size = 3, alpha = 0.9
+  ) +
+  
+  # State labels
+  geom_text(
+    data = scores,
+    aes(x = PC1, y = PC2, label = State, color = vote),
+    size = 2.8, vjust = -0.9, show.legend = FALSE
+  ) +
+  
+  # PCA Loadings (arrows)
+  geom_segment(
+    data = loadings,
+    aes(x = 0, y = 0, xend = PC1 * 3, yend = PC2 * 3),
+    arrow = arrow(length = unit(0.2, "cm")),
+    color = "black"
+  ) +
+  
+  geom_text(
+    data = loadings,
+    aes(x = PC1 * 3.2, y = PC2 * 3.2, label = variable),
+    size = 5
+  ) +
+  
+  scale_color_manual(values = c("Democrat" = "blue",
+                                "Republican" = "red")) +
+  
+  scale_shape_manual(values = c(
+    "Biden" = 16,       # solid circle
+    "Trump" = 17,       # triangle
+    "Obama" = 15,       # square
+    "Bush" = 18         # diamond
+  )) +
+  
+  theme_bw() +
+  labs(
+    title = "PCA Biplot of State Differences vs US",
+    x = paste0("PC1 (", round(summary(pca)$importance[2,1] * 100, 2), "%)"),
+    y = paste0("PC2 (", round(summary(pca)$importance[2,2] * 100, 2), "%)"),
+    color = "State Vote",
+    shape = "Administration"
+  )
+
+```
+
+
+```{r}
+library(dplyr)
+
+# Get PCA scores with State info
+scores_df <- scores %>% 
+  select(State, vote, admin, PC1, PC2)
+
+# Define clusters by PC1 cutoffs
+scores_df <- scores_df %>%
+  mutate(
+    cluster = case_when(
+      PC1 < -1 ~ "Left Cluster",
+      PC1 > 2  ~ "Right Cluster",
+      TRUE     ~ "Middle Cluster"
+    )
+  )
+
+# List states in each cluster
+clusters <- scores_df %>%
+  group_by(cluster) %>%
+  summarise(states = paste(State, collapse = ", "))
+clusters
+
+```

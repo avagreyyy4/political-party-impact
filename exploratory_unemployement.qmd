@@ -65,7 +65,7 @@ unemployement_filtered <- unemployement_filtered|>
     end_rate = unemployement_rate[which.max(Year)],
     difference = end_rate-start_rate,
     percent_change = (end_rate-start_rate)/end_rate,
-    vote = vote
+    vote = first(vote)
     
   ) |> distinct()
 
@@ -81,7 +81,6 @@ unemployement_us_avg <- unemployement_filtered |>
     dif_from_us = round(dif_from_us, 3))
   
 ```
-
 
 ```{r}
 #| fig.height: 15
@@ -102,7 +101,6 @@ unemployement_us_avg |> ggplot(aes(x = dif_from_us, y = State_in_panel, color = 
                                     title = "Average Unemployement Rate Throughout 21st Century Administrations")
 ```
 
-
 ```{r}
 #| fig.height: 15
 
@@ -114,6 +112,26 @@ unemployement_us_avg |> mutate(State_in_panel = reorder_within(State, percent_ch
       "United States" = "gray"
     )) + scale_y_reordered() + labs(y = "State", x = "percent_change in Unemployement",
                                     title = "percent_change in Unemployement Throughout 21st Century Administrations", caption = "percent_change calculated as last year in office minus first year in office (smaller values show decline in unemployement throughout years)")
+```
+
+```{r}
+icecreamcolors <- c("lightgreen", "pink")
+
+mosaic2 <- unemployement_us_avg |>
+  mutate(increase = ifelse(dif_from_us > 0, 1, 0))|>
+  mutate(administration = case_when(
+    administration == "Biden" ~ "Democrat",
+    administration == "Obama" ~ "Democrat",
+    administration == "Trump" ~ "Republican",
+    administration == "Bush" ~ "Republican"
+  ))|>
+  select(vote, increase, administration) |> 
+  group_by(vote, increase, administration) |>
+  summarize(Freq = n()) |> ungroup()
+
+vcd::mosaic(increase ~ vote + administration, mosaic2, direction = c("v", "v", "h"),
+            highlighting_fill = icecreamcolors)
+
 ```
 
 ```{r}
@@ -149,7 +167,6 @@ four_maps <- ggplot(mapping_joined, aes(long, lat, group = group, fill = dif_fro
 ```{r}
 four_maps
 ```
-
 
 ```{r}
 library(dplyr)
@@ -191,7 +208,164 @@ difference_visual <- ggplot(
 difference_visual
 ```
 
-
 Seems for republicans states specifically in the middle country do better: idaho, wyoming, nebraska, oklahoma etc. Look into these states
 
-For democrats: costal cities do better 
+For democrats: costal cities do better
+
+Also, coastal cities seem to have the least variation ==\> are fine off usually regardless of which party is in power
+
+```{r}
+library(tidyverse)
+library(tidycensus)
+library(choroplethr)
+library(choroplethrMaps)
+
+# Load your Census API key
+census_api_key(Sys.getenv("CENSUS_API_KEY"), install = FALSE)
+
+# ----- Pull ACS 2024 Industry Data -----
+df <- get_acs(
+  geography = "state",
+  table = "C24050",
+  survey = "acs1",
+  year = 2012,
+  output = "tidy"
+)
+
+# ----- Total employment (C24050_001) -----
+totals <- df %>%
+  filter(variable == "C24050_001") %>%
+  select(NAME, total = estimate)
+
+# ----- Agriculture employment (C24050_002) -----
+ag <- df %>%
+  filter(variable == "C24050_002") %>%
+  select(NAME, ag = estimate)
+
+# ----- Compute percentage -----
+ag_pct <- ag %>%
+  left_join(totals, by = "NAME") %>%
+  mutate(
+    pct = ag / total,
+    region = tolower(NAME)   # choroplethr requires lowercase state names
+  ) %>%
+  select(region, value = pct)
+
+
+```
+
+```{r}
+all_states <- c(state.name, "District of Columbia")
+allowed_states <- c(consistent_blue, consistent_red)
+blank_states <- setdiff(all_states, allowed_states)
+```
+
+```{r}
+ag_pct2 <- ag_pct %>%
+  mutate(value = ifelse(region %in% tolower(blank_states), NA, value))
+
+state_choropleth(
+  ag_pct2,
+  title  = "Agriculture Employment Share (ACS 2024)",
+  legend = "Percent of Workforce"
+)
+
+```
+
+```{r}
+one_admin <- "Obama"
+
+library(tidyverse)
+library(ggplot2)
+library(scales)
+library(maps)
+
+# ---- choose which president you want ----
+one_admin <- "Obama"    # change to Bush, Obama, Trump, Biden
+
+# ---- filter to just that administration ----
+mapping_one <- unemployement_us_avg %>%
+  filter(administration == one_admin) %>%
+  mutate(state_lower = tolower(State))
+
+# ---- bring in map data ----
+us_map <- map_data("state")
+
+mapping_joined <- us_map %>%
+  left_join(mapping_one, 
+            by = c("region" = "state_lower"),
+            relationship = "many-to-many")
+
+# ---- symmetric fill limits ----
+lim <- max(abs(mapping_joined$dif_from_us), na.rm = TRUE)
+
+# ---- plot ----
+one_map <- ggplot(mapping_joined, 
+                  aes(long, lat, group = group, fill = dif_from_us)) +
+  geom_polygon(color = "white", linewidth = 0.2) +
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  scale_fill_gradient2(
+    name = "State − US change",
+    low = "darkgreen", mid = "white", high = "red",
+    midpoint = 0,
+    limits = c(-lim, lim),
+    oob = squish,
+    na.value = "grey90"
+  ) +
+  labs(
+    title = paste("State − U.S. Unemployment Gap During", one_admin),
+    x = NULL, y = NULL
+  ) +
+  theme_minimal(base_size = 12) +
+  theme(
+    panel.grid = element_blank(),
+    axis.text = element_blank(),
+    axis.ticks = element_blank(),
+    legend.position = "right"
+  )
+
+one_map
+
+```
+
+```{r}
+df <- get_acs(
+  geography = "state",
+  table = "C24050",
+  survey = "acs1",
+  year = 2024,
+  output = "tidy"
+)
+
+# ----- Total employment (C24050_001) -----
+totals <- df %>%
+  filter(variable == "C24050_001") %>%
+  select(NAME, total = estimate)
+
+# ----- Agriculture employment (C24050_002) -----
+ag <- df %>%
+  filter(variable == "C24050_002") %>%
+  select(NAME, ag = estimate)
+
+# ----- Compute percentage -----
+ag_pct <- ag %>%
+  left_join(totals, by = "NAME") %>%
+  mutate(
+    pct = ag / total,
+    region = tolower(NAME)   # choroplethr requires lowercase state names
+  ) %>%
+  select(region, value = pct)
+
+```
+
+```{r}
+ag_pct2 <- ag_pct %>%
+  mutate(value = ifelse(region %in% tolower(blank_states), NA, value))
+
+state_choropleth(
+  ag_pct2,
+  title  = "Agriculture Employment Share (ACS 2024)",
+  legend = "Percent of Workforce"
+)
+
+```

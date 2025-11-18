@@ -3,6 +3,7 @@ title: "exploratory_state_factors"
 format: html
 editor: visual
 ---
+
 ```{r, message = FALSE}
 library(readr)
 library(dplyr)
@@ -47,7 +48,6 @@ state_income <- state_income|>
 state_income$observation_date <- as.Date(state_income$observation_date)
 
 ```
-
 
 ```{r}
 state_income2 <- state_income|>
@@ -118,7 +118,28 @@ adm_dot_plot|> mutate(State_in_panel = reorder_within(State,
       "United States" = "gray"
     )) + scale_y_reordered()
 ```
-#Ask about seeing orderings of states ==> visual or rank variable? 
+
+```{r}
+icecreamcolors2 <- c("pink", "lightgreen") 
+mosaic <- state_income2 |>
+  mutate(increase = ifelse(dif_from_us > 0, 1, 0))|>
+  mutate(administration = case_when(
+    administration == "Biden" ~ "Democrat",
+    administration == "Obama" ~ "Democrat",
+    administration == "Trump" ~ "Republican",
+    administration == "Bush" ~ "Republican"
+  ))|>
+  select(vote, increase, administration) |> 
+  group_by(vote, increase, administration) |>
+  summarize(Freq = n()) |> ungroup()
+
+vcd::mosaic(increase ~ vote + administration, mosaic, direction = c("v", "v", "h"),
+            highlighting_fill = icecreamcolors2)
+```
+
+
+#Ask about seeing orderings of states ==\> visual or rank variable?
+
 ```{r}
 mapping <- adm_dot_plot |> mutate(state_lower = tolower(State))
 us_map <- map_data("state") 
@@ -147,7 +168,9 @@ four_maps2 <- ggplot(mapping_joined, aes(long, lat, group = group, fill = dif_fr
         axis.ticks = element_blank()
     )
 ```
-## ask about how to plot this since it seems that certain administrations just had better economic outcomes 
+
+## ask about how to plot this since it seems that certain administrations just had better economic outcomes
+
 ```{r}
 four_maps2
 ```
@@ -167,6 +190,35 @@ state_income3 <- state_income|> mutate(vote = case_when(
       "Republican" = "red",
       "Democrat"   = "blue"))
 ```
+
+```{r}
+state_income3 |> 
+  ggplot(aes(x = Year, y = avg, color = vote)) +
+
+  # ---- Correct background shading using annotate() ----
+  annotate("rect",
+           xmin = as.Date("2011-01-01"),
+           xmax = as.Date("2016-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2016-01-01"),
+           xmax = as.Date("2019-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+
+  # ---- Lines ----
+  geom_line(size = 1) +
+
+  scale_color_manual(values = c(
+    "Democrat"   = "blue",
+    "Republican" = "red"
+  )) +
+  labs(x = "Year", y = "Median Income")
+
+
+```
+
 
 ```{r}
 library(dplyr)
@@ -218,5 +270,3 @@ slope_plot <- ggplot(state_income3, aes(x = Year, y = avg, color = vote)) +
 ```{r}
 slope_plot
 ```
-
-
