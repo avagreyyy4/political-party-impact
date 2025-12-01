@@ -137,7 +137,6 @@ vcd::mosaic(increase ~ vote + administration, mosaic, direction = c("v", "v", "h
             highlighting_fill = icecreamcolors2)
 ```
 
-
 #Ask about seeing orderings of states ==\> visual or rank variable?
 
 ```{r}
@@ -218,7 +217,6 @@ state_income3 |>
 
 
 ```
-
 
 ```{r}
 library(dplyr)

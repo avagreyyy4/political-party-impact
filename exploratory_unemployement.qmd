@@ -115,7 +115,7 @@ unemployement_us_avg |> mutate(State_in_panel = reorder_within(State, percent_ch
 ```
 
 ```{r}
-icecreamcolors <- c("lightgreen", "pink")
+rate_colors <- c("lightgreen", "pink")
 
 mosaic2 <- unemployement_us_avg |>
   mutate(increase = ifelse(dif_from_us > 0, 1, 0))|>
@@ -130,7 +130,7 @@ mosaic2 <- unemployement_us_avg |>
   summarize(Freq = n()) |> ungroup()
 
 vcd::mosaic(increase ~ vote + administration, mosaic2, direction = c("v", "v", "h"),
-            highlighting_fill = icecreamcolors)
+            highlighting_fill = rate_colors)
 
 ```
 

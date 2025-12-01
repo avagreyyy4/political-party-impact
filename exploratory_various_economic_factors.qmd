@@ -3,6 +3,7 @@ title: "looking at various economic factors"
 format: html
 editor: visual
 ---
+
 ```{r}
 various_factors <- read_csv("data/state_factors.csv")
 ```
@@ -87,7 +88,6 @@ obama_years <- as.character(2009:2016)
 bush_years  <- as.character(2001:2008)
 ```
 
-
 ```{r}
 various_factors_exp <- various_factors2|>
   select(-IRPD, -Real_PI, -Real_PC_PI, -RPP, -Real_PC_PCE, -Real_PCE) |>
@@ -140,7 +140,6 @@ US <- various_factors_exp |>
     administration, dif_GDP, dif_PC_PI, dif_PC_DPI, dif_PC_PCE
   )
 ```
-
 
 ```{r}
 data_ready <- various_factors_exp |>
@@ -204,7 +203,6 @@ ggparcoord(
 
 ```
 
-
 ```{r}
 plot_data_trump <- data_ready |>
   filter(administration == "Trump") |>
@@ -263,7 +261,6 @@ ggparcoord(
 
 ```
 
-
 ```{r}
 plot_data_bush <- data_ready |>
   filter(administration == "Bush") |>
@@ -305,7 +302,6 @@ biden_facet <- data_ready %>%
   labs(title="Differences from U.S. by Party and Metric")
 ```
 
-
 ```{r}
 biden_facet
 ```
@@ -322,7 +318,6 @@ trump_facet <- data_ready %>%
   labs(title="Differences from U.S. by Party and Metric")
 
 ```
-
 
 ```{r}
 trump_facet
@@ -525,7 +520,6 @@ ggplot() +
 
 ```
 
-
 ```{r}
 library(ggplot2)
 library(dplyr)
@@ -659,7 +653,6 @@ ggplot() +
   )
 
 ```
-
 
 ```{r}
 library(dplyr)

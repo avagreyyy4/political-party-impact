@@ -1,0 +1,232 @@
+---
+title: "Final Exploration + Story"
+author: "Ava Grey (ag4378)"
+format: html
+editor: visual
+---
+```{r, message = FALSE}
+#| echo: FALSE
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(forcats)
+library(tidytext)
+library(scales)
+library(lubridate)
+library(stringr)
+library(sf)
+library(ggplot2)
+library(biscale)
+library(tidycensus)
+library(choroplethr)
+library(choroplethrMaps)
+```
+
+## Question: Do states that consistently vote for the same political party in every presidential election since 2000 perform better economically under presidents from that party?
+
+### Unemployment Rate
+
+Unemployment rate was the first metric that explored. Unemployment rate refers to the the percent of a workforce that does not work (https://www.oecd.org/en/data/indicators/unemployment-rate.html). Further, it is a metric to quantify the amount of able-working-of-age individuals who are actively seeking a job, that do not have a job.
+
+To analyze this value across states, I created a variable "Difference from US." Naturally, certain states have higher and lower unemployment rate due to population size, common industries, and various other factors related to the state. To avoid confounding variables, "Difference from US" standardizes each states unemployment rate in relation to the US. To quantify how a state does under a certain administration, I derived the difference which is their unemployment rate the last year that president was in office subtracted from the first year. For example, Biden's years are 2021 to 2024. Similar to "Difference from US," I found it more valuable to look at difference rather than average since certain states have inherently higher or lower unemployment rates.
+
+The data for this section has been cleaned from a data set with each state's unemployment rate, including the United States, to only the difference in unemployment rate from the US, State, the party the state voted for, part of the administration at the time, and the name of the president during that period. 
+
+```{r}
+unemployement <- read_csv("data/unemployement_rate_by_state.csv")
+```
+
+Additionally, for this analysis, only states that have voted the exact same every election since 2000 will be considered. 
+
+There are 16 states that voted blue in every presidential election since 2000, and there are 20 states that have voted red in every presidential election since 2000.
+
+```{r}
+consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
+
+consistent_red <- c("Alaska", "Alabama", "Arkansas", "Idaho", "Kansas", "Kentucky", "Louisiana", "Missouri", "Mississippi", "Montana", "Nebraska", "North Dakota", "Oklahoma", "South Carolina", "South Dakota", "Tennesse", "Texas", "Utah", "Wyoming", "West Virginia")
+
+united_states <- c("United States")
+
+all_consistent <- union(consistent_blue, consistent_red)
+
+all_consistent <- union(all_consistent, united_states)
+
+biden_years <- c(2024, 2023, 2022, 2021)
+trump_years <- c(2020, 2019, 2018, 2017)
+obama_years <- c(2016, 2015, 2014, 2013, 
+                 2012, 2011, 2010, 2009)
+bush_years <- c(2008, 2007, 2006, 2005, 
+                 2004, 2003, 2002, 2001)
+```
+
+```{r}
+#filtering and feature engineering
+unemployement_filtered <- unemployement |> 
+  filter(State %in% all_consistent) |>
+  pivot_longer(cols = `2024`:`2001`, 
+               names_to = 'Year', 
+               values_to = 'unemployement_rate')|>
+  mutate(
+    vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"),
+    administration = case_when(
+      Year %in% biden_years ~ "Biden",
+      Year %in% trump_years ~ "Trump",
+      Year %in% obama_years ~ "Obama",
+      Year %in% bush_years ~ "Bush"
+      
+    )
+  )|> select(-"2000") 
+
+unemployement_filtered$Year <- as.Date(paste0(unemployement_filtered$Year, "-01-01"))
+
+unemployement_filtered <- unemployement_filtered|>
+  group_by(administration, State)|>
+  reframe(
+    start_rate = unemployement_rate[which.min(Year)],
+    end_rate = unemployement_rate[which.max(Year)],
+    difference = end_rate-start_rate,
+    percent_change = (end_rate-start_rate)/end_rate,
+    vote = first(vote)
+    
+  ) |> distinct()
+
+unemployement_us_avg <- unemployement_filtered |>
+  mutate(
+    dif_from_us = difference - case_when(
+      administration == "Biden" ~ -0.013,
+      administration == "Trump" ~  0.037,
+      administration == "Obama" ~ -0.044,
+      administration == "Bush"  ~  0.011,
+      TRUE ~ NA_real_
+    ),
+    dif_from_us = round(dif_from_us, 3)) |> filter (State != "United States")
+```
+
+Now, we can visualize how certain states unemployement rate change for each president compared to how the United States changed.
+
+```{r}
+unemployement_us_avg <- unemployement_us_avg |>
+  mutate(administration = factor(
+    administration,
+    levels = c("Bush", "Obama", "Trump", "Biden")  
+  )) |> mutate(State_in_panel = reorder_within(State, dif_from_us, administration))
+
+unemployement_us_avg |> ggplot(aes(x = dif_from_us, y = State_in_panel, color = vote)) + geom_point() +
+  facet_wrap(~administration, scales = "free_y") + scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue",
+      "United States" = "gray"
+    )) + scale_y_reordered() + labs(y = "State", x = "Average Unemployement Rate",
+                                    title = "Average Unemployement Rate Throughout 21st Century Administrations")
+```
+
+Note: a positive difference indicates the state's unemployment rate did *worse* compares to the United States since difference is measured from United States - <State>, and a lower unemployment rate is better. 
+
+Observations: Specifically with the last three presidents, there is a clear pattern between states that have better unemployment vs worse unemployment. Under Biden and Obama, the top handful of states that performed the worse compared to the US were Republican states. Comparatively, under Trump the states that performed the worse were democratic-voting states. 
+
+
+```{r}
+rate_colors <- c("#57C4AD", "#EDA247")
+
+mosaic2 <- unemployement_us_avg |>
+  mutate(change = ifelse(dif_from_us > 0, "Increase", "Decrease"))|>
+  mutate(administration = case_when(
+    administration == "Biden" ~ "Democrat",
+    administration == "Obama" ~ "Democrat",
+    administration == "Trump" ~ "Republican",
+    administration == "Bush" ~ "Republican"
+  ))|>
+  select(vote, change, administration) |> 
+  group_by(vote, change, administration) |>
+  summarize(Freq = n()) |> ungroup()
+
+vcd::mosaic(change ~ vote + administration, mosaic2, direction = c("v", "v", "h"),
+            highlighting_fill = rate_colors)
+
+```
+
+This mosaic plot looks at the frequency of states that perform better compared to the US average and worse categorized by how they voted and what political party the administration belonged to. The interesting contrast is looking between how states vote. Specifically, Republican states have the largest difference of performance depending on the part of the administration. For example, the far left rectangle shows republican states perform far better with republican presidents while the rectangle next to it shows they have much higher unemployment rates under democratic administration.  
+
+Comparatively, the two rectangles on the left (states that vote democrat) have very little difference between which party is the administration. 
+
+
+A note from the earlier dot plot, we are able to see how each type of state (democrat vs republican) perform, but we do not see if they are the same states or if there are geographic patterns. 
+
+```{r}
+mapping <- unemployement_us_avg |> mutate(state_lower = tolower(State))
+us_map <- map_data("state") 
+
+mapping_joined <- mapping |>
+  left_join(us_map, by = c("state_lower" = "region"),
+            relationship = "many-to-many")
+
+lim <- max(abs(mapping_joined$dif_from_us), na.rm = TRUE)
+
+four_maps <- ggplot(mapping_joined, aes(long, lat, group = group, fill = dif_from_us, rm.na=TRUE)) +
+    geom_polygon(color = "white", linewidth = 0.2) +
+    coord_map("albers", lat0 = 39, lat1 = 45) +
+    facet_wrap(~ administration, ncol = 2) +   
+    scale_fill_gradient2(
+        name = "State − US change",
+        low = "darkorange", mid = "white", high = "darkgreen",
+        midpoint = 0,
+        limits = c(-lim, lim),
+        oob = squish, na.value = "grey90"
+    ) + theme_minimal()+
+    theme(
+        panel.grid = element_blank(),
+        axis.text = element_blank(),
+        axis.ticks = element_blank()
+    ) + labs(x = "", y = "")
+```
+
+```{r}
+four_maps
+```
+
+We see a slight pattern geographically with the middle of the country having clear color differences between administrations. Specifically, states like south and north Dakota, nebraska, Montana, Wyoming, and Oklahoma have strong differences between administrations. 
+
+This can be seen clearer with a heat map:
+
+```{r}
+state_order <- unemployement_us_avg %>%
+  group_by(State) %>%
+  summarise(var_gap = sd(dif_from_us, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(var_gap)) %>%
+  pull(State)
+
+lim <- max(abs(unemployement_us_avg$dif_from_us), na.rm = TRUE)
+
+difference_visual <- ggplot(
+  unemployement_us_avg,
+  aes(x = administration,
+      y = factor(State, levels = state_order),   # apply ordering here
+      fill = dif_from_us)
+) +
+  geom_tile(color = "white") +
+  labs(title = "State − U.S. unemployment gap by administration",
+       x = NULL, y = NULL) +
+  scale_fill_gradient2(
+    name = "State − US change",
+    low = "darkgreen", mid = "white", high = "darkorange",
+    midpoint = 0,
+    limits = c(-lim, lim),
+    labels = label_percent(accuracy = 0.001),   # no rounding; or keep 0.1%
+    na.value = "grey90"
+  ) +
+  theme_bw() +
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+difference_visual
+```
+
+Again, those middle states make up a majority of the top states with the most difference between administrations. Comparatively, many coastal cities have very little variation.  
+
+
+We can now try to derive potential geographical patterns to contextualize this polarization. We will look at industry impact.
