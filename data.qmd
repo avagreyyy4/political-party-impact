@@ -2,20 +2,68 @@
 
 ## Description
 
-The data for this project has been pulled from various government databases. The first dataset is from the United States census and contains median salary values broken down by ethnicity and gender from the years 2000 to 2024 ([Historical Income Tables: People](https://www.census.gov/data/tables/time-series/demo/income-poverty/historical-income-people.html)). The United States Census obtains yearly data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values. 
+The data for this project has been pulled from various government databases. The first dataset is from the United States Bureau of Economic Analysis and contains information on each state's GDP, various per-capita personal income variables, and employment from 2001 to 2024 ([Economic Factors by State](https://www.bea.gov/data/income-saving/personal-income-by-state)). The Bureau of Economic Analysis obtains most of its data from Census Bureau surveys or federal administration surveys. The United States Census obtains yearly data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values^[See U.S. Census Bureau, "How the Data Are Collected," n.d., https://www.census.gov/programs-surveys/gov-finances/technical-documentation/methodology/how-the-data-are-collected.html.]. 
 
-
-The second dataset is from the United States Bureau of Economic Analysis and contains information on each state's GDP, per capita personal income, and employment from 2001 to 2024 ([Economic Factors by State](https://www.bea.gov/data/income-saving/personal-income-by-state)). The Bureau of Economic Analysis obtains most of its data from Census Bureau surveys or federal administration surveys.  
-
-
-The third dataset, from the Federal Reserve Bank of St. Louis (FRED), contains median household income data for each state from 2001 to 2024 ([Median Income by State](https://fred.stlouisfed.org/release/tables?eid=259515&rid=249)). The dataset has 53 columns, including "Year", all 50 states, the District of Columbia, and the United States average, and 23 rows spanning 2001 through 2024. 
-
+The second dataset, from the Federal Reserve Bank of St. Louis (FRED), contains median household income data for each state from 2001 to 2024 ([Median Income by State](https://fred.stlouisfed.org/release/tables?eid=259515&rid=249)). The dataset has 53 columns, including "Year", all 50 states, the District of Columbia, and the United States average, and 23 rows spanning 2001 through 2024. 
 
 The last dataset from the Rhode Island Department of Labor and Training contains the unemployment rate for each state from 2000 to 2024 ([Unemployment Rate by State](https://dlt.ri.gov/labor-market-information)). The dataset has 25 columns, including "State" and the years 2000 through 2024, and 52 rows, including all fifty states, the District of Columbia, and the United States average.  
 
 
-This project also plans to reference, but not directly use, election result data. This data will consist of the percentage of the state that voted for each major party, and the percentage of each sex and ethnicity that voted for each major party, for each election from 2000 to 2024. 
-
-This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis may explore differences between years for every state or manually adjust certain features for inflation. Secondly, for ethnic demographic data, many ambiguous assumptions exist for users filling out surveys. This means there may be inconsistencies with how survey-takers interpret or answer the questions. Data related to the sex or ethnicity of United States citizens may not be included in the final analysis due to comparison limitations (demographic breakdowns may not be available for early elections) and potential biases in the survey data. 
+This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis will create features to standardize for these differences. For example, creating variables in relation to the US average in order to identify differences in relative values, not raw values. Additionally, median income and various per-capita variables are estimates and do not accurately reflect populations. So, it is important to remember this fact when exploring findings. 
 
 ## Missing value analysis
+
+The only dataset with missing values is the United States Bureau of Economic Analysis which contains data across states and years on various economic factors. Since the unemployement rate and median income data sets do not contain and missing values, they will not be explored in this section for simplicity. 
+
+```{r}
+#| fig-width: 13
+library(readr)
+library(redav)
+library(dplyr)
+various_factors <- read_csv("/Users/avagrey/political-party-impact/data/clean_preprocessed/various_factors_clean.csv")
+
+various_factors |>
+  filter(State == "Alabama") |>
+  plot_missing(percent = FALSE)
+```
+Since the data set is large, the plot above is only looking at missing patterns for the state of Alabama. However, as the plot states, every safe state follows this pattern. Either the row has every variable, or, it is missing Real Personal Income, Real Personal Consumption Expenditures, Real Per Capita Personal Income, and Real Per Capita Personal Consumption Expenditures. From these patterns it is clear that certain years Personal Income and Personal Consumption Expenditures were not recorded at the raw level and the per capita level. 
+
+Since the data can also be formatted by year rather than state, there could also be insight into specific years missing data.
+
+```{r}
+library(ggplot2)
+library(tidyr)
+various_factors |>
+  pivot_longer(
+    cols = -c(State, Year),
+    names_to = "variable",
+    values_to = "value"
+  )|>
+  group_by(Year, variable) |>
+  summarize(
+    pct_missing = mean(is.na(value)) * 100,
+    .groups = "drop"
+  )|> 
+  ggplot(aes(x = Year, y = variable, fill = pct_missing)) +
+  geom_tile(color = "gray") +
+  scale_fill_gradient(
+    low = "white",
+    high = "purple",
+    name = "% Missing"
+  ) +
+  labs(
+    title = "Missing Data Percentage Across States by Year and Variable",
+    x = "Year",
+    y = "Variable"
+  ) +
+  theme_minimal()+
+  theme(
+    axis.text.x = element_text(angle = 45, hjust = 1),
+    panel.grid = element_blank()
+  ) +
+  scale_x_continuous(breaks = c(2001, 2012, 2024))
+```
+
+This plot aims to identify which years are missing the four variables and how often they are (in relation to the states). However, it is clear from this plot that for every state the same eight years are missing the same four variables. It seems that data for the missing variables were not recorded at the beginning of the 21st century. Also, potentially at the time the data was pulled, 2024 had not been recorded. 
+
+Since every state is missing data for Real Personal Income, Real Per Capita Personal Income, Real Per Capita Personal Consumption Expenditures, and Real Personal Consumption Expenditures through the years 2001-2007 and 2024, the analysis will focus on the available data an adjust for inflation impact with feature engineering relative metrics. 

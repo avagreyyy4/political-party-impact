@@ -1,0 +1,988 @@
+---
+title: "Final Exploration + Story"
+author: "Ava Grey (ag4378)"
+format: html
+editor: visual
+---
+
+```{r, message = FALSE}
+#| echo: FALSE
+library(readr)
+library(dplyr)
+library(tidyverse)
+library(forcats)
+library(tidytext)
+library(scales)
+library(lubridate)
+library(stringr)
+library(sf)
+library(ggplot2)
+library(biscale)
+library(tidycensus)
+library(choroplethr)
+library(choroplethrMaps)
+library(ggrepel)
+```
+
+## Question: Do states that consistently vote for the same political party in every presidential election since 2000 perform better economically under presidents from that party?
+
+### Unemployment Rate
+
+Unemployment rate was the first metric that was explored. Unemployment rate refers to the the percent of a workforce that does not work (https://www.oecd.org/en/data/indicators/unemployment-rate.html). Further, it is a metric to quantify the amount of able-working-of-age individuals who are actively seeking a job, that do not have a job.
+
+To analyze this value across states, I created a variable "Difference from US." Naturally, certain states have higher and lower unemployment rate due to population size, common industries, and various other factors related to the state. To avoid confounding variables, "Difference from US" standardizes each states unemployment rate in relation to the US. To quantify how a state does under a certain administration, I derived the difference which is their unemployment rate the last year that president was in office subtracted from the first year. For example, Biden's years are 2021 to 2024. Similar to "Difference from US," I found it more valuable to look at difference rather than average since certain states have inherently higher or lower unemployment rates.
+
+The data for this section has been cleaned from a data set with each state's unemployment rate, including the United States, to only the difference in unemployment rate from the US, State, the party the state voted for, part of the administration at the time, and the name of the president during that period.
+
+```{r}
+unemployement <- read_csv("/Users/avagrey/political-party-impact/data/raw/unemployement_rate_by_state.csv")
+```
+
+Additionally, for this analysis, only states that have voted the exact same every election since 2000 will be considered.
+
+There are 16 states that voted blue in every presidential election since 2000, and there are 20 states that have voted red in every presidential election since 2000.
+
+```{r}
+consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
+
+consistent_red <- c("Alaska", "Alabama", "Arkansas", "Idaho", "Kansas", "Kentucky", "Louisiana", "Missouri", "Mississippi", "Montana", "Nebraska", "North Dakota", "Oklahoma", "South Carolina", "South Dakota", "Tennesse", "Texas", "Utah", "Wyoming", "West Virginia")
+
+united_states <- c("United States")
+
+all_consistent <- union(consistent_blue, consistent_red)
+
+all_consistent <- union(all_consistent, united_states)
+
+biden_years <- c(2024, 2023, 2022, 2021)
+trump_years <- c(2020, 2019, 2018, 2017)
+obama_years <- c(2016, 2015, 2014, 2013, 
+                 2012, 2011, 2010, 2009)
+bush_years <- c(2008, 2007, 2006, 2005, 
+                 2004, 2003, 2002, 2001)
+```
+
+```{r}
+#filtering and feature engineering
+unemployement_filtered <- unemployement |> 
+  filter(State %in% all_consistent) |>
+  pivot_longer(cols = `2024`:`2001`, 
+               names_to = 'Year', 
+               values_to = 'unemployement_rate')|>
+  mutate(
+    Vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"),
+    administration = case_when(
+      Year %in% biden_years ~ "Biden",
+      Year %in% trump_years ~ "Trump",
+      Year %in% obama_years ~ "Obama",
+      Year %in% bush_years ~ "Bush"
+      
+    )
+  )|> select(-"2000") 
+
+unemployement_filtered$Year <- as.Date(paste0(unemployement_filtered$Year, "-01-01"))
+
+unemployement_filtered <- unemployement_filtered|>
+  group_by(administration, State)|>
+  reframe(
+    start_rate = unemployement_rate[which.min(Year)],
+    end_rate = unemployement_rate[which.max(Year)],
+    difference = end_rate-start_rate,
+    percent_change = (end_rate-start_rate)/end_rate,
+    Vote = first(Vote),
+    US_avg = mean()
+    
+  ) |> distinct()
+
+unemployement_us_avg <- unemployement_filtered |>
+  mutate(
+    dif_from_us = difference - case_when(
+      administration == "Biden" ~ -0.013,
+      administration == "Trump" ~  0.037,
+      administration == "Obama" ~ -0.044,
+      administration == "Bush"  ~  0.011,
+      TRUE ~ NA_real_
+    ),
+    dif_from_us = round(dif_from_us, 3)) |> filter (State != "United States")
+```
+
+Now, we can visualize how certain states unemployement rate change for each president compared to how the United States changed.
+
+```{r}
+#| fig-height: 10
+#| fig-width: 10
+unemployement_us_avg <- unemployement_us_avg |>
+  mutate(administration = factor(
+    administration,
+    levels = c("Bush", "Obama", "Trump", "Biden")  
+  )) |> mutate(State_in_panel = reorder_within(State, dif_from_us, administration))
+
+unemployement_us_avg |> ggplot(aes(x = dif_from_us, y = State_in_panel, color = Vote)) + geom_point() +
+  facet_wrap(~administration, scales = "free_y") + scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue",
+      "United States" = "gray"
+    )) + scale_y_reordered() + labs(y = "State", x = "Average Unemployement Rate",
+                                    title = "Average Unemployement Rate Throughout 21st Century Administrations")
+```
+
+Note: a positive difference indicates the state's unemployment rate did *worse* compares to the United States since difference is measured from United States -'State', and a lower unemployment rate is better.
+
+Observations: Specifically with the last three presidents, there is a clear pattern between states that have better unemployment vs worse unemployment. Under Biden and Obama, the top handful of states that performed the worse compared to the US were Republican states. Comparatively, under Trump the states that performed the worse were democratic-voting states.
+
+```{r, message = FALSE}
+rate_colors <- c("#008837", "#7b3294")
+
+mosaic2 <- unemployement_us_avg |>
+  mutate(Change = ifelse(dif_from_us <= 0, "Decrease", "Increase"))|>
+  mutate(Administration = case_when(
+    administration == "Biden" ~ "Democrat",
+    administration == "Obama" ~ "Democrat",
+    administration == "Trump" ~ "Republican",
+    administration == "Bush" ~ "Republican"
+  ))|>
+  select(Vote, Change, Administration) |> 
+  group_by(Vote, Change, Administration) |>
+  summarize(Freq = n()) |> ungroup() 
+
+vcd::mosaic(Change ~ Vote + Administration, mosaic2, direction = c("v", "v", "h"),
+            highlighting_fill = rate_colors)
+
+```
+
+This mosaic plot looks at the frequency of states that perform better compared to the US average and worse categorized by how they voted and what political party the administration belonged to. The interesting contrast is looking between how states vote. Specifically, Republican states have the largest difference of performance depending on the part of the administration. For example, the far left rectangle shows republican states perform far better with republican presidents while the rectangle next to it shows they have much higher unemployment rates under democratic administration.
+
+Comparatively, the two rectangles on the left (states that vote democrat) have very little difference between which party is the administration.
+
+A note from the earlier dot plot, we are able to see how each type of state (democrat vs republican) perform, but we do not see if they are the same states or if there are geographic patterns.
+
+```{r}
+mapping <- unemployement_us_avg |> mutate(state_lower = tolower(State))
+us_map <- map_data("state") 
+
+mapping_joined <- mapping |>
+  left_join(us_map, by = c("state_lower" = "region"),
+            relationship = "many-to-many")
+
+lim <- max(abs(mapping_joined$dif_from_us), na.rm = TRUE)
+
+four_maps <- ggplot(mapping_joined, aes(long, lat, group = group, fill = dif_from_us)) +
+  geom_polygon(color = "grey80", linewidth = 0.2) +         # slightly darker borders
+  coord_map("albers", lat0 = 39, lat1 = 45) +
+  facet_wrap(~ administration, ncol = 2) +
+  scale_fill_gradient2(
+    name = "State − US change",
+    low = "#008837", high = "#7b3294",
+    midpoint = 0, limits = c(-lim, lim),
+    oob = squish, na.value = "grey90"
+  ) +
+  theme_minimal() +
+  theme(
+    panel.grid       = element_blank(),
+    axis.text        = element_blank(),
+    axis.ticks       = element_blank(),
+    panel.background = element_rect(fill = "grey95", colour = NA),  # <—
+    plot.background  = element_rect(fill = "white",  colour = NA)
+  ) +
+  labs(x = "", y = "")
+```
+
+```{r}
+four_maps
+```
+
+We see a slight pattern geographically with the middle of the country having clear color differences between administrations. Specifically, states like south and north Dakota, nebraska, Montana, Wyoming, and Oklahoma have strong differences between administrations.
+
+This can be seen clearer with a heat map:
+
+```{r}
+state_order <- unemployement_us_avg %>%
+  group_by(State) %>%
+  summarise(var_gap = sd(dif_from_us, na.rm = TRUE), .groups = "drop") %>%
+  arrange(desc(var_gap)) %>%
+  pull(State)
+
+lim <- max(abs(unemployement_us_avg$dif_from_us), na.rm = TRUE)
+
+difference_visual <- ggplot(
+  unemployement_us_avg,
+  aes(x = administration,
+      y = factor(State, levels = state_order),   # apply ordering here
+      fill = dif_from_us)
+) +
+  geom_tile(color = "white") +
+  labs(title = "State − U.S. unemployment gap by administration",
+       x = NULL, y = NULL) +
+  scale_fill_gradient2(
+    name = "State − US change",
+    low = "#008837", mid = "white", high = "#7b3294",
+    midpoint = 0,
+    limits = c(-lim, lim),
+    labels = label_percent(accuracy = 0.001),   # no rounding; or keep 0.1%
+    na.value = "grey90"
+  ) +
+  theme_bw() +
+  theme(panel.grid = element_blank())
+```
+
+```{r}
+difference_visual
+```
+
+Again, those middle states make up a majority of the top states with the most difference between administrations. Comparatively, many coastal cities have very little variation.
+
+### Median Income
+
+We can now look at median income which is another metric to define economic performance. Median income measures the raw median income for working-abeled individuals.
+
+```{r}
+state_income <- read_csv("data/all_states_median_income.csv")
+
+consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
+
+consistent_red <- c("Alaska", "Alabama", "Arkansas", "Idaho", "Kansas", "Kentucky", "Louisiana", "Missouri", "Mississippi", "Montana", "Nebraska", "North Dakota", "Oklahoma", "South Carolina", "South Dakota", "Tennesse", "Texas", "Utah", "Wyoming", "West Virginia")
+
+all_consistent <- union(consistent_blue, consistent_red)
+
+to_dates <- function(yrs) as.Date(sprintf("%d-01-01", yrs))
+
+biden_years <- to_dates(2021:2024)
+trump_years <- to_dates(2017:2020)
+obama_years <- to_dates(2009:2016)
+bush_years  <- to_dates(2001:2008)
+```
+
+```{r}
+state_income2 <- state_income|>
+  mutate(
+    vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"),
+    administration = case_when(
+      observation_date %in% biden_years ~ "Biden",
+      observation_date %in% trump_years ~ "Trump",
+      observation_date %in% obama_years ~ "Obama",
+      observation_date %in% bush_years ~ "Bush"
+    ),
+    vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"
+    )) |>
+  group_by(administration, State)|>
+  reframe(
+    starting_median = median_income[which.min(observation_date)],
+    ending_median = median_income[which.max(observation_date)],
+    difference = ending_median - starting_median,
+    pct_change = difference/starting_median,
+    vote=vote
+    )|> mutate(
+  dif_from_us = difference - case_when(
+      administration == "Biden" ~ 2460,
+      administration == "Trump" ~  -90,
+      administration == "Obama" ~ 5310,
+      administration == "Bush"  ~  4870,
+      TRUE ~ NA_real_
+    ),
+    dif_from_us = round(dif_from_us, 3))
+  
+  
+```
+
+```{r}
+state_income_boxplot <- state_income|>
+  mutate(
+    vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"),
+    administration = case_when(
+      observation_date %in% biden_years ~ "Biden",
+      observation_date %in% trump_years ~ "Trump",
+      observation_date %in% obama_years ~ "Obama",
+      observation_date %in% bush_years ~ "Bush"
+    ),
+    vote = case_when(
+      State %in% consistent_red ~ "Republican",
+      State %in% consistent_blue ~ "Democrat",
+      State == 'United States' ~ "United States"
+    )) |> group_by(State) |>
+  summarize(avg_median = mean(median_income),
+            vote = first(vote),
+            `2001_income` = first(median_income),
+            `2024_income` = last(median_income),
+            )
+  
+```
+
+Before understanding this metric, it is interesting to see how states vary in median income.
+
+```{r}
+state_income_boxplot |> 
+  ggplot(aes(x = vote, y = avg_median, fill = vote)) +
+  geom_boxplot(alpha = 0.7) +
+  scale_fill_manual(values = c(
+    "Democrat"   = "blue",
+    "Republican" = "red"
+  )) +
+  labs(x = "Vote", y = "Median Income") +
+  scale_y_continuous(labels = scales::comma)+
+  theme_minimal()
+```
+
+```{r}
+state_income_boxplot2 <- state_income_boxplot|> 
+  pivot_longer(`2001_income`:`2024_income`, names_to = 'year_income', values_to = 'values')
+
+outliers <- state_income_boxplot2 %>%
+  group_by(vote, year_income) %>%
+  mutate(
+    Q1  = quantile(values, 0.25, na.rm = TRUE),
+    Q3  = quantile(values, 0.75, na.rm = TRUE),
+    IQR = Q3 - Q1,
+    lower = Q1 - 1.5 * IQR,
+    upper = Q3 + 1.5 * IQR,
+    is_outlier = values < lower | values > upper
+  ) %>%
+  filter(is_outlier)
+
+state_income_boxplot2 |>
+  ggplot(aes(x = vote, y = values, fill = vote)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  # hide default outliers
+  
+  # Outlier points (hidden from legend)
+  geom_point(
+    data = outliers,
+    aes(x = vote, y = values),
+    color = "black",
+    show.legend = FALSE
+  ) +
+  
+  # Outlier labels (also hidden from legend)
+  geom_text_repel(
+    data = outliers,
+    aes(label = State, x = vote, y = values),
+    size = 3,
+    max.overlaps = 10,
+    show.legend = FALSE
+  ) +
+  
+  scale_fill_manual(values = c(
+    "Democrat"   = "blue",
+    "Republican" = "red"
+  )) +
+  facet_wrap(~ year_income) +
+  labs(x = "Vote", y = "Median Income") +
+  scale_y_continuous(labels = scales::comma)+
+  theme_minimal()
+
+```
+
+This box plot shows that Democratic State's have higher median incomes than republican box plots. In fact, it seems that over 75% of Democratic state's earn more than around 75% of Republican state's. This follows Andrew Gelman's book "Red State, Blue State, Rich State, Poor State: Why Americans Vote the Way They Do." Richer states tend to vote Democrat while richer individuals vote Republican. Also Democratic states have been richer for the entire 21st century. Additionally, the income inequality between Republican and Democratic states slightly grew from 2001 to 2024.
+
+Income time series to see relative difference
+
+```{r}
+state_income3 <- state_income|> mutate(vote = case_when(
+  State %in% consistent_blue ~ "Democrat",
+  State %in% consistent_red ~ "Republican")) |> group_by(observation_date, vote)|> 
+  reframe(avg = mean(median_income),
+            Year = observation_date, vote = vote)
+
+
+  state_income3|> ggplot(aes(x = Year, y = avg, color = vote)) + 
+  geom_line() +
+  scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue")) + 
+      annotate("rect",
+           xmin = as.Date("2009-01-01"),
+           xmax = as.Date("2016-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2001-01-01"),
+           xmax = as.Date("2008-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+    annotate("rect",
+           xmin = as.Date("2017-01-01"),
+           xmax = as.Date("2020-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2021-01-01"),
+           xmax = as.Date("2025-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+    theme_minimal(base_size = 14)
+```
+
+Overall, Democratic and Republican state's median incomes follow very similar trends. Both state's seem to react the same, with identical spikes and increases/decreases. However, since Democrat's and Republican's earn different amounts of income it is hard to see smaller slope differences.
+
+We can standardize both averages by creating an index to see relative changes to better understand how certain states do during different administrations.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+
+# ---- Create indexed series (100 = first year value for each group) ----
+state_income_index <- state_income3 |>
+  group_by(vote) |> 
+  arrange(Year) |> 
+  mutate(start_value = first(avg),
+         index = (avg / start_value) * 1) |> 
+  ungroup()
+
+# ---- Plot ----
+slope_plot2 <- state_income_index |> 
+  ggplot(aes(x = Year, y = index, color = vote)) +
+
+  # ---- Presidency shading ----
+  annotate("rect",
+           xmin = as.Date("2009-01-01"),
+           xmax = as.Date("2016-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2001-01-01"),
+           xmax = as.Date("2008-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+    annotate("rect",
+           xmin = as.Date("2017-01-01"),
+           xmax = as.Date("2020-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2021-01-01"),
+           xmax = as.Date("2025-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+
+  # ---- Lines ----
+  geom_line(size = 1.1) +
+
+  # ---- Colors ----
+  scale_color_manual(values = c(
+    "Democrat"   = "blue",
+    "Republican" = "red"
+  )) +
+
+  labs(
+    x = "Year",
+    y = "Indexed Median Income",
+    title = "Relative Growth in Median Income by State Party Group"
+  ) +
+
+  theme_minimal(base_size = 14)
+
+```
+
+\`
+
+```{r}
+slope_plot2
+```
+
+Since Democratic state's earn more than Republican states it is helpful to index to see relative changes. Looking at the two lines in relation to the colors behind it, it is interesting to see that during Obama's term Republican and Democrat states performed relatively the same. Comparatively, during Bush and Trumps terms' the states had clear differences with Democratic states gaining more median income.
+
+Also, under any administration, Republican State's never peform better than democratic states. However, during two Republican administrations, democratic state's peformed better
+
+## GDP, persoanl income, personal disposable income
+
+Lastly, we can look at three additional features, Per Capita Personal Consumption Expenditures, Per Capita Disposable Personal Income, Per Capita Personal Income, GDP:
+
+```{r}
+various_factors <- read_csv("data/state_factors.csv")
+```
+
+```{r}
+various_factors_clean <- various_factors |>
+  mutate(across(`2001`:`2024`, ~na_if(.x, "(NA)")))
+
+various_factors2 <- various_factors_clean |>
+  select(-`1998`, -`1999`, -`2000`) |>
+  filter(!is.na(LineCode)) |>
+  select(-LineCode) |>
+  pivot_longer(
+    cols = `2001`:`2024`,
+    names_to = "Year",
+    values_to = "Value"
+  ) |>
+  pivot_wider(
+    names_from = Description,
+    values_from = Value
+  ) |> rename(
+    "State" = "GeoName",
+    Real_GDP    = `Real GDP (millions of chained 2017 dollars) 1`,
+    Real_PI     = `Real personal income (millions of constant (2017) dollars) 2`,
+    Real_PCE    = `Real PCE (millions of constant (2017) dollars) 3`,
+    GDP         = `Gross domestic product (GDP)`,
+    PI          = `Personal income`,
+    DPI         = `Disposable personal income`,
+    PCE         = `Personal consumption expenditures`,
+    Real_PC_PI  = `Real per capita personal income 4`,
+    Real_PC_PCE = `Real per capita PCE 5`,
+    PC_PI       = `Per capita personal income 6`,
+    PC_DPI      = `Per capita disposable personal income 7`,
+    PC_PCE      = `Per capita personal consumption expenditures (PCE) 8`,
+    RPP         = `Regional price parities (RPPs) 9`,
+    IRPD        = `Implicit regional price deflator 10`,
+    Employment  = `Total employment (number of jobs)`
+    
+  )
+
+```
+
+```{r}
+consistent_blue <- c("California", "Oregon", "Washington", "Minnesota", "Illinois", "New York", "Vermont", "New Jersey", "Maine", "Rhode Island", "Maryland", "Delaware", "District of Columbia", "Conneticut", "Hawaii", "Massachusetts")
+
+consistent_red <- c("Alaska", "Alabama", "Arkansas", "Idaho", "Kansas", "Kentucky", "Louisiana", "Missouri", "Mississippi", "Montana", "Nebraska", "North Dakota", "Oklahoma", "South Carolina", "South Dakota", "Tennesse", "Texas", "Utah", "Wyoming", "West Virginia", "United States")
+
+all_consistent <- union(consistent_blue, consistent_red)
+
+to_dates <- function(yrs) as.Date(sprintf("%d-01-01", yrs))
+
+biden_years <- as.character(2021:2024)
+trump_years <- as.character(2017:2020)
+obama_years <- as.character(2009:2016)
+bush_years  <- as.character(2001:2008)
+```
+
+```{r}
+various_factors_exp <- various_factors2 |>
+  select(-IRPD, -Real_PI, -Real_PC_PI, -RPP, -Real_PC_PCE, -Real_PCE) |>
+  filter(State %in% all_consistent) |>
+  select(GeoFips, State, Year, Real_GDP, PC_PI, PC_DPI, PC_PCE)|>
+  mutate(across(c(Real_GDP, PC_PI, PC_DPI, PC_PCE), ~ as.numeric(.)))|>
+  mutate(administration = case_when(
+    Year %in% biden_years ~ "Biden",
+    Year %in% trump_years ~ "Trump",
+    Year %in% obama_years ~ "Obama",
+    Year %in% bush_years ~ "Bush"
+  ),
+  vote = case_when(
+    State %in% consistent_red ~ "Republican",
+    State %in% consistent_blue ~ "Democrat"
+  ),
+  presidental_party = case_when(
+    administration == "Biden" | administration == "Obama" ~ "Democrat",
+    administration == "Trump" | administration == "Bush" ~ "Republican"
+  ),
+  Date = ymd(paste0(Year, "-01-01")))  |>
+  group_by(administration, State) |>
+  arrange(Date, .by_group = TRUE) |>
+  reframe(
+    start_GDP     = first(Real_GDP),
+    end_GDP       = last(Real_GDP),
+    dif_GDP       = end_GDP - start_GDP,
+
+    start_PC_PI   = first(PC_PI),
+    end_PC_PI     = last(PC_PI),
+    dif_PC_PI     = end_PC_PI - start_PC_PI,
+
+    start_PC_DPI  = first(PC_DPI),
+    end_PC_DPI    = last(PC_DPI),
+    dif_PC_DPI    = end_PC_DPI - start_PC_DPI,
+
+    start_PC_PCE  = first(PC_PCE),
+    end_PC_PCE    = last(PC_PCE),
+    dif_PC_PCE    = end_PC_PCE - start_PC_PCE,
+
+    vote = first(vote),
+    administration = first(administration),
+    presidental_party = first(presidental_party)
+  )
+
+
+
+US <- various_factors_exp |>
+  filter(State == "United States") |> select(
+    administration, dif_GDP, dif_PC_PI, dif_PC_DPI, dif_PC_PCE
+  )
+```
+
+```{r}
+data_ready <- various_factors_exp |>
+  mutate(dif_GDP_US = case_when(
+    administration == "Biden" ~ dif_GDP - 1826028,
+    administration == "Trump" ~ dif_GDP - 672398,
+    administration == "Obama" ~ dif_GDP - 2792562,
+    administration == "Bush" ~ dif_GDP - 2550759
+  ),
+  dif_PC_PI_US = case_when(
+    administration == "Biden" ~ dif_PC_PI - 8512,
+    administration == "Trump" ~ dif_PC_PI - 8145,
+    administration == "Obama" ~ dif_PC_PI - 9667,
+    administration == "Bush" ~ dif_PC_PI - 9306
+    
+  ),
+  dif_PC_DPI_US = case_when(
+    administration == "Biden" ~ dif_PC_DPI - 7851,
+    administration == "Trump" ~ dif_PC_DPI - 8698,
+    administration == "Obama" ~ dif_PC_DPI - 7384,
+    administration == "Bush" ~ dif_PC_DPI - 7640
+  ),
+  dif_PC_PCE_US = case_when(
+    administration == "Biden" ~ dif_PC_PCE - 9960,
+    administration == "Trump" ~ dif_PC_PCE - 2227,
+    administration == "Obama" ~ dif_PC_PCE - 6995,
+    administration == "Bush" ~ dif_PC_PCE - 8226
+  ))|>
+  filter(State != "United States")
+```
+
+```{r}
+df_avg_adm <- data_ready |>
+  group_by(presidental_party, State) |>
+  summarize(
+    presidental_party = first(presidental_party),
+    State = first(State),
+    vote = first(vote),
+    dif_GDP_US = mean(dif_GDP_US),
+    dif_PC_PI_US = mean(dif_PC_PI_US),
+    dif_PC_DPI_US = mean(dif_PC_DPI_US),
+    dif_PC_PCE_US = mean(dif_PC_PCE_US)
+  )
+```
+
+There does not seem to be a very strong relationship between administrations.
+
+```{r, message = FALSE}
+library(ggridges)
+
+df_avg_adm2 <- df_avg_adm |>
+  select(-dif_GDP_US)
+
+df_ridge2 <- df_avg_adm2 |>
+  pivot_longer(
+    cols = starts_with("dif_"), 
+    names_to = "variable", 
+    values_to = "value"
+  )
+
+ggplot(df_ridge2, 
+       aes(x = value, 
+           y = variable, 
+           fill = vote)) +
+  geom_density_ridges(alpha = 0.6, scale = 1) +
+  scale_fill_manual(values = c("Democrat" = "blue",
+                               "Republican" = "red")) +
+  ggtitle("Distribution of State-Level Economic Differences") +
+  xlab("Value") +
+  ylab("Economic Variable") +
+  facet_wrap(~ presidental_party)+
+  theme_minimal()
+
+```
+
+Democratic states have average modes larger than Republican states. However, under Republican presidents, Republican states have larger right tails while democrats have very little change.
+
+Now,
+
+```{r}
+data_ready$administration <- factor(
+  data_ready$administration,
+  levels = c("Bush", "Obama", "Trump", "Biden")   # chronological order
+)
+
+data_ready %>% 
+  ggplot(aes(
+    x = dif_PC_DPI_US, 
+    y = dif_PC_PCE_US, 
+    color = vote
+  )) +
+  geom_point(size = 2, alpha = 0.8) +
+  facet_wrap(~ administration) +
+  scale_color_manual(
+    values = c(
+      "Republican" = "#D62728",
+      "Democrat"   = "#1F77B4"
+    )
+  ) +
+  theme_bw() +
+  labs(
+    x = "Per Capita Disposable Personal Income Difference (vs US)",
+    y = "Per Capita Consumption Expenditures Difference (vs US)",
+    title = "State Differences in PC Income vs PC PCE by Administration"
+  )
+
+```
+
+These scatter plots aim to better understand PCE and DPI which gives insights into a State's economic turnover (left over money and spending). Additionally, there are clear clusters between republican and democratic states.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+
+data_ready <- data_ready |>
+  group_by(administration) |>
+  mutate(
+    outlier_label = ifelse(
+      (dif_PC_PCE_US > 3800 | dif_PC_DPI_US > 5800),
+      State,
+      NA
+    )
+  ) |>
+  ungroup()
+
+
+
+data_ready$administration <- factor(
+  data_ready$administration,
+  levels = c("Bush", "Obama", "Trump", "Biden")
+)
+
+ggplot(data_ready, aes(
+    x = dif_PC_DPI_US, 
+    y = dif_PC_PCE_US, 
+    color = vote
+)) +
+  geom_point(size = 2, alpha = 0.8) +
+
+  # ---- NEW PART: LABEL OUTLIERS ----
+  geom_text_repel(
+    aes(label = outlier_label),
+    size = 3,
+    max.overlaps = Inf,
+    box.padding = 0.4,
+    point.padding = 0.2,
+    min.segment.length = 0
+  ) +
+
+  facet_wrap(~ administration) +
+  scale_color_manual(
+    values = c("Republican" = "#D62728", "Democrat" = "#1F77B4")
+  ) +
+  theme_bw() +
+  labs(
+    x = "Per Capita Disposable Personal Income Difference (vs US)",
+    y = "Per Capita Consumption Expenditures Difference (vs US)",
+    title = "State Differences in PC Income vs PC PCE by Administration"
+  )
+
+```
+
+```{r}
+data_ready_biden <- data_ready|>
+  filter(administration == "Biden") |>
+  select(State, vote, administration,
+         dif_PC_PI, dif_PC_DPI, dif_PC_PCE) |> 
+  mutate(across(where(is.numeric), ~round((.x-mean(.x))/sd(.x), 2)))
+
+data_ready_trump <- data_ready|>
+  filter(administration == "Trump") |>
+  select(State, vote, administration,
+         dif_PC_PI, dif_PC_DPI, dif_PC_PCE) |> 
+  mutate(across(where(is.numeric), ~round((.x-mean(.x))/sd(.x), 2)))
+
+data_ready_Obama <- data_ready|>
+  filter(administration == "Obama") |>
+  select(State, vote, administration,
+         dif_PC_PI, dif_PC_DPI, dif_PC_PCE) |> 
+  mutate(across(where(is.numeric), ~round((.x-mean(.x))/sd(.x), 2)))
+
+data_ready_bush <- data_ready|>
+  filter(administration == "Bush") |>
+  select(State, vote, administration,
+         dif_PC_PI, dif_PC_DPI, dif_PC_PCE) |> 
+  mutate(across(where(is.numeric), ~round((.x-mean(.x))/sd(.x), 2)))
+```
+
+```{r}
+pca_biden <- prcomp(data_ready_biden[, 4:6], scale. = TRUE)
+
+scores_biden <- as.data.frame(pca_biden$x)
+scores_biden$State <- data_ready_biden$State
+scores_biden$vote  <- data_ready_biden$vote
+scores_biden$color <- ifelse(scores_biden$vote == "Democrat", "blue", "red")
+
+library(ggplot2)
+
+# Extract loading vectors for arrows
+loadings <- as.data.frame(pca_biden$rotation[, 1:2])
+loadings$variable <- rownames(loadings)
+
+ggplot() +
+  # PCA Points
+  geom_point(data = scores_biden,
+             aes(x = PC1, y = PC2, color = color),
+             size = 3) +
+  
+  # State labels
+  geom_text(data = scores_biden,
+            aes(x = PC1, y = PC2, label = State),
+            size = 2.8, vjust = -0.7) +
+  
+  # PCA variable arrows
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0, 
+                   xend = PC1 * 3, 
+                   yend = PC2 * 3),
+               arrow = arrow(length = unit(0.25, "cm")),
+               color = "darkblue") +
+  
+  geom_text(data = loadings,
+            aes(x = PC1 * 3, y = PC2 * 3, label = variable),
+            color = "darkblue", size = 3, vjust = -0.4) +
+
+  # Manual red/blue colors
+  scale_color_identity() +   # IMPORTANT: Use the values directly
+  theme_minimal() +
+  labs(
+    title = "PCA Biplot of Biden Administration",
+    x = "PC1",
+    y = "PC2"
+  )
+
+```
+
+```{r}
+pca_trump <- prcomp(data_ready_trump[, 4:6], scale. = TRUE)
+
+scores_trump <- as.data.frame(pca_trump$x)
+scores_trump$State <- data_ready_trump$State
+scores_trump$vote  <- data_ready_trump$vote
+scores_trump$color <- ifelse(scores_trump$vote == "Democrat", "blue", "red")
+
+library(ggplot2)
+
+# Extract loading vectors for arrows
+loadings <- as.data.frame(pca_trump$rotation[, 1:2])
+loadings$variable <- rownames(loadings)
+
+ggplot() +
+  # PCA Points
+  geom_point(data = scores_trump,
+             aes(x = PC1, y = PC2, color = color),
+             size = 3) +
+  
+  # State labels
+  geom_text(data = scores_trump,
+            aes(x = PC1, y = PC2, label = State),
+            size = 2.8, vjust = -0.7) +
+  
+  # PCA variable arrows
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0, 
+                   xend = PC1 * 3, 
+                   yend = PC2 * 3),
+               arrow = arrow(length = unit(0.25, "cm")),
+               color = "darkblue") +
+  
+  geom_text(data = loadings,
+            aes(x = PC1 * 3, y = PC2 * 3, label = variable),
+            color = "darkblue", size = 3, vjust = -0.4) +
+
+  # Manual red/blue colors
+  scale_color_identity() +   # IMPORTANT: Use the values directly
+  theme_minimal() +
+  labs(
+    title = "PCA Biplot of Trump Administration",
+    x = "PC1",
+    y = "PC2"
+  )
+```
+
+```{r}
+pca_obama <- prcomp(data_ready_Obama[, 4:6], scale. = TRUE)
+
+scores_obama <- as.data.frame(pca_obama$x)
+scores_obama$State <- data_ready_Obama$State
+scores_obama$vote  <- data_ready_Obama$vote
+scores_obama$color <- ifelse(scores_obama$vote == "Democrat", "blue", "red")
+
+library(ggplot2)
+
+# Extract loading vectors for arrows
+loadings <- as.data.frame(pca_obama$rotation[, 1:2])
+loadings$variable <- rownames(loadings)
+
+ggplot() +
+  # PCA Points
+  geom_point(data = scores_obama,
+             aes(x = PC1, y = PC2, color = color),
+             size = 3) +
+  
+  # State labels
+  geom_text(data = scores_obama,
+            aes(x = PC1, y = PC2, label = State),
+            size = 2.8, vjust = -0.7) +
+  
+  # PCA variable arrows
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0, 
+                   xend = PC1 * 3, 
+                   yend = PC2 * 3),
+               arrow = arrow(length = unit(0.25, "cm")),
+               color = "darkblue") +
+  
+  geom_text(data = loadings,
+            aes(x = PC1 * 3, y = PC2 * 3, label = variable),
+            color = "darkblue", size = 3, vjust = -0.4) +
+
+  # Manual red/blue colors
+  scale_color_identity() +   # IMPORTANT: Use the values directly
+  theme_minimal() +
+  labs(
+    title = "PCA Biplot of Obama Administration",
+    x = "PC1",
+    y = "PC2"
+  )
+```
+
+```{r}
+pca_bush <- prcomp(data_ready_bush[, 4:6], scale. = TRUE)
+
+scores_bush <- as.data.frame(pca_bush$x)
+scores_bush$State <- data_ready_bush$State
+scores_bush$vote  <- data_ready_bush$vote
+scores_bush$color <- ifelse(scores_bush$vote == "Democrat", "blue", "red")
+
+library(ggplot2)
+
+# Extract loading vectors for arrows
+loadings <- as.data.frame(pca_bush$rotation[, 1:2])
+loadings$variable <- rownames(loadings)
+
+ggplot() +
+  # PCA Points
+  geom_point(data = scores_bush,
+             aes(x = PC1, y = PC2, color = color),
+             size = 3) +
+  
+  # State labels
+  geom_text(data = scores_bush,
+            aes(x = PC1, y = PC2, label = State),
+            size = 2.8, vjust = -0.7) +
+  
+  # PCA variable arrows
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0, 
+                   xend = PC1 * 3, 
+                   yend = PC2 * 3),
+               arrow = arrow(length = unit(0.25, "cm")),
+               color = "darkblue") +
+  
+  geom_text(data = loadings,
+            aes(x = PC1 * 3, y = PC2 * 3, label = variable),
+            color = "darkblue", size = 3, vjust = -0.4) +
+
+  # Manual red/blue colors
+  scale_color_identity() +   # IMPORTANT: Use the values directly
+  theme_minimal() +
+  labs(
+    title = "PCA Biplot of Bush Administration",
+    x = "PC1",
+    y = "PC2"
+  )
+```
+
+\`\`\`

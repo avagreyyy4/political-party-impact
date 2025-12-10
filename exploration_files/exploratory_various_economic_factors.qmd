@@ -3,14 +3,18 @@ title: "looking at various economic factors"
 format: html
 editor: visual
 ---
-
 ```{r}
-various_factors <- read_csv("data/state_factors.csv")
+library(dplyr)
+library(tidyverse)
 ```
 
 ```{r}
+various_factors <- read_csv("/Users/avagrey/political-party-impact/data/raw/state_factors.csv")
 various_factors_clean <- various_factors |>
   mutate(across(`2001`:`2024`, ~na_if(.x, "(NA)")))
+```
+
+```{r}
 
 various_factors2 <- various_factors_clean |>
   select(-`1998`, -`1999`, -`2000`) |>
@@ -42,26 +46,33 @@ various_factors2 <- various_factors_clean |>
     IRPD        = `Implicit regional price deflator 10`,
     Employment  = `Total employment (number of jobs)`
     
-  )
+  ) |>
+  select(-GeoFips, -IRPD, RPP)
 
 ```
 
 ```{r}
-#various_factors_NA <- various_factors2 |>
- # rownames_to_column("id") |>
- # pivot_longer(
-  #  cols = -id,
-  #  names_to = "key",
-  #  values_to = "value"
- # ) |>
- # mutate(missing = ifelse(is.na(value), "yes", "no"))
+library(redav)
+various_factors2 |>
+  filter(State == 'Alabama')|> plot_missing(percent = FALSE)
+```
 
-#ggplot(various_factors_NA, aes(x = key, y = fct_rev(id), fill = missing)) +
-  #geom_tile(color = "white") + 
-  #ggtitle("mtcars with NAs added") +
-  #ylab('') + 
-  #scale_fill_viridis_d() + # discrete scale
-  #theme_bw()
+```{r}
+various_factors_NA <- various_factors2 |>
+  filter(State == "Alabama") |>
+  rownames_to_column("id") |>
+  pivot_longer(
+   cols = -id,
+   names_to = "key",
+   values_to = "value"
+   ) |> mutate(missing = ifelse(is.na(value), "yes", "no"))
+
+ggplot(various_factors_NA, aes(x = key, y = fct_rev(year), fill = missing)) +
+  geom_tile(color = "white") + 
+  ggtitle("mtcars with NAs added") +
+  ylab('') + 
+  scale_fill_viridis_d() + # discrete scale
+  theme_bw()
 
 ```
 
@@ -324,25 +335,89 @@ trump_facet
 ```
 
 ```{r}
+data_ready$administration <- factor(
+  data_ready$administration,
+  levels = c("Bush", "Obama", "Trump", "Biden")   # chronological order
+)
+
 data_ready %>% 
   ggplot(aes(
-    x = dif_PC_PI_US, 
-    y = dif_PC_DPI_US, 
+    x = dif_PC_DPI_US, 
+    y = dif_PC_PCE_US, 
     color = vote
   )) +
   geom_point(size = 2, alpha = 0.8) +
   facet_wrap(~ administration) +
   scale_color_manual(
     values = c(
-      "Republican" = "#D62728",  # red
-      "Democrat"   = "#1F77B4"   # blue
+      "Republican" = "#D62728",
+      "Democrat"   = "#1F77B4"
     )
   ) +
   theme_bw() +
   labs(
-    x = "Per Capita Personal Income Difference (vs US)",
-    y = "Per Capita DPI Difference (vs US)",
-    title = "State Differences in PC Income vs PC DPI by Administration"
+    x = "Per Capita Disposable Personal Income Difference (vs US)",
+    y = "Per Capita Consumption Expenditures Difference (vs US)",
+    title = "State Differences in PC Income vs PC PCE by Administration"
+  )
+
+```
+
+These scatter plots aim to better understand PCE and DPI which gives insights into a State's economic turnover (left over money and spending). Additionally, there are clear clusters between republican and democratic states.
+
+```{r}
+library(dplyr)
+library(ggplot2)
+library(ggrepel)
+data_ready <- data_ready |>
+  mutate(outlier_label = ifelse(
+    abs(dif_PC_PCE_US) > 4000 | abs(dif_PC_DPI_US) > 4000,
+    State,
+    NA
+  ))
+
+
+data_ready <- data_ready |>
+  group_by(administration) |>
+  mutate(
+    outlier_label = ifelse(
+      rank(-abs(dif_PC_PCE_US)) <= 2 | rank(-abs(dif_PC_DPI_US)) <= 2,
+      State,
+      NA
+    )
+  )
+
+data_ready$administration <- factor(
+  data_ready$administration,
+  levels = c("Bush", "Obama", "Trump", "Biden")
+)
+
+ggplot(data_ready, aes(
+    x = dif_PC_DPI_US, 
+    y = dif_PC_PCE_US, 
+    color = vote
+)) +
+  geom_point(size = 2, alpha = 0.8) +
+
+  # ---- NEW PART: LABEL OUTLIERS ----
+  geom_text_repel(
+    aes(label = outlier_label),
+    size = 3,
+    max.overlaps = Inf,
+    box.padding = 0.4,
+    point.padding = 0.2,
+    min.segment.length = 0
+  ) +
+
+  facet_wrap(~ administration) +
+  scale_color_manual(
+    values = c("Republican" = "#D62728", "Democrat" = "#1F77B4")
+  ) +
+  theme_bw() +
+  labs(
+    x = "Per Capita Disposable Personal Income Difference (vs US)",
+    y = "Per Capita Consumption Expenditures Difference (vs US)",
+    title = "State Differences in PC Income vs PC PCE by Administration"
   )
 
 ```

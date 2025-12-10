@@ -19,6 +19,7 @@ library(readxl)
 ```{r}
 #state_data <- read_csv("data/state_factors.csv")
 state_income <- read_csv("data/all_states_median_income.csv")
+
 ```
 
 ```{r}
@@ -34,19 +35,6 @@ biden_years <- to_dates(2021:2024)
 trump_years <- to_dates(2017:2020)
 obama_years <- to_dates(2009:2016)
 bush_years  <- to_dates(2001:2008)
-```
-
-```{r}
-state_income <- state_income|>
-  filter(observation_date >= '2000-01-01') |>
-  rename("Oklahoma" = "MEHOINUSOKA672N",
-         "Utah" = "MEHOINUSUTA672N")|>
-  pivot_longer("United States":"Wyoming",
-               names_to = "State",
-               values_to = "median_income")|>
-  filter(State %in% all_consistent)
-state_income$observation_date <- as.Date(state_income$observation_date)
-
 ```
 
 ```{r}
@@ -220,51 +208,53 @@ state_income3 |>
 
 ```{r}
 library(dplyr)
-library(lubridate)
-library(broom)
 library(ggplot2)
-library(scales)
 
-# 1) Start from your data
-series <- state_income3 %>%
-  mutate(year = year(Year),
-         period = case_when(
-           year %in% 2011:2016 ~ "2011–2016",
-           year %in% 2017:2019 ~ "2017–20219",
-           TRUE ~ NA_character_
-         ))
+# ---- Create indexed series (100 = first year value for each group) ----
+state_income_index <- state_income3 |>
+  group_by(vote) |> 
+  arrange(Year) |> 
+  mutate(start_value = first(avg),
+         index = (avg / start_value) * 100) |> 
+  ungroup()
 
-# 2) Fit OLS per (party × period) and build segment endpoints
-lines_df <- series %>%
-  filter(!is.na(period)) %>%
-  group_by(vote, period) %>%
-  do({
-    m  <- lm(avg ~ year, data = .)
-    cf <- coef(m)                 # intercept, slope
-    x0 <- min(.$year);  x1 <- max(.$year)
-    y0 <- cf[1] + cf[2]*x0; y1 <- cf[1] + cf[2]*x1
-    tibble(intercept = cf[1], slope = cf[2],
-           x0 = as.Date(paste0(x0, "-01-01")),
-           x1 = as.Date(paste0(x1, "-01-01")),
-           y0 = y0, y1 = y1)
-  }) %>%
-  ungroup() %>%
-  mutate(slope_lab = paste0(vote, " ", period, " — ",
-                            dollar(slope, accuracy = 1), "/yr"))
+# ---- Plot ----
+slope_plot2 <- state_income_index |> 
+  ggplot(aes(x = Year, y = index, color = vote)) +
 
-# 3) Plot: your colored lines + black slope overlays
-slope_plot <- ggplot(state_income3, aes(x = Year, y = avg, color = vote)) +
-  geom_line(size = 0.9) +
-  scale_color_manual(values = c(Republican = "red", Democrat = "blue")) +
-  geom_segment(data = lines_df,
-               aes(x = x0, xend = x1, y = y0, yend = y1, linetype = slope_lab),
-               inherit.aes = FALSE, color = "black", linewidth = 1.2) +
-  labs(x = "Year", y = "avg", color = "vote",
-       linetype = "Slope lines (value = $/yr)") +
-  theme_minimal()
+  # ---- Presidency shading ----
+  annotate("rect",
+           xmin = as.Date("2011-01-01"),
+           xmax = as.Date("2016-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2016-01-01"),
+           xmax = as.Date("2019-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+
+  # ---- Lines ----
+  geom_line(size = 1.1) +
+
+  # ---- Colors ----
+  scale_color_manual(values = c(
+    "Democrat"   = "blue",
+    "Republican" = "red"
+  )) +
+
+  labs(
+    x = "Year",
+    y = "Indexed Median Income (100 = first year)",
+    title = "Relative Growth in Median Income by State Party Group"
+  ) +
+
+  theme_minimal(base_size = 14)
 
 ```
 
+\`
+
 ```{r}
-slope_plot
+slope_plot2
 ```

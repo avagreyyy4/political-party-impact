@@ -223,52 +223,57 @@ library(choroplethrMaps)
 # Load your Census API key
 census_api_key(Sys.getenv("CENSUS_API_KEY"), install = FALSE)
 
-# ----- Pull ACS 2024 Industry Data -----
-df <- get_acs(
-  geography = "state",
-  table = "C24050",
-  survey = "acs1",
-  year = 2012,
-  output = "tidy"
-)
+years <- 2005:2008
 
-# ----- Total employment (C24050_001) -----
-totals <- df %>%
-  filter(variable == "C24050_001") %>%
-  select(NAME, total = estimate)
+ag_pct_all <- map_dfr(years, function(year) {
+  df <- get_acs(
+    geography = "state",
+    table = "C24050",
+    survey = "acs1",
+    year = year,
+    output = "tidy"
+  )
 
-# ----- Agriculture employment (C24050_002) -----
-ag <- df %>%
-  filter(variable == "C24050_002") %>%
-  select(NAME, ag = estimate)
+  totals <- df %>%
+    filter(variable == "C24050_001") %>%
+    select(NAME, total = estimate)
 
-# ----- Compute percentage -----
-ag_pct <- ag %>%
-  left_join(totals, by = "NAME") %>%
-  mutate(
-    pct = ag / total,
-    region = tolower(NAME)   # choroplethr requires lowercase state names
-  ) %>%
-  select(region, value = pct)
+  ag <- df %>%
+    filter(variable == "C24050_002") %>%
+    select(NAME, ag = estimate)
 
+  ag_pct_year <- ag %>%
+    left_join(totals, by = "NAME") %>%
+    mutate(
+      value  = ag / total,
+      region = tolower(NAME),
+      year   = year
+    ) %>%
+    select(region, year, value)
 
+  return(ag_pct_year)
+})
 ```
 
 ```{r}
-all_states <- c(state.name, "District of Columbia")
-allowed_states <- c(consistent_blue, consistent_red)
-blank_states <- setdiff(all_states, allowed_states)
+ag_pct_bush <- ag_pct_all|>
+  group_by(region)|>
+  summarize(
+    State = first(region),
+    value_avg = mean(value)
+  ) |> select(-region)
+
+write_csv(ag_pct_obama, "data/ag_pct_obama.csv")
 ```
 
 ```{r}
-ag_pct2 <- ag_pct %>%
-  mutate(value = ifelse(region %in% tolower(blank_states), NA, value))
-
 state_choropleth(
-  ag_pct2,
+  ag_pct,
   title  = "Agriculture Employment Share (ACS 2024)",
   legend = "Percent of Workforce"
-)
+) +
+  scale_fill_gradient2(low = "darkorange", mid = "white", high = "darkgreen", na.value = "white")
+
 
 ```
 

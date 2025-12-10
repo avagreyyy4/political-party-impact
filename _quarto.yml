@@ -4,6 +4,10 @@ project:
 
 execute:
   echo: true
+  warning: false
+  message: false
+
+bibliography: references.bib
 
 book:
   title: "Political Party Impact"
@@ -20,6 +24,7 @@ book:
     - data.qmd
     - results.qmd
     - conclusion.qmd
+    - references.bib
 
 format:
   html:

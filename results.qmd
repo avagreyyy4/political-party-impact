@@ -1,1 +1,519 @@
 # Results
+
+This section summarizes key findings from each dataset, identifying trends across economic factors and safe states. 
+
+## Unemployement Rate
+
+The first variable of interest is Unemployment Rate. To understand presidential impact, the variable change was created. Change is defined as the unemployment rate of the state the last year the respective president was in office subtracted from the first year they took office. Naturally, certain states have lower unemployment rates for reasons related to population size, specific industries, or age of workforce. To account for these difference, the analysis uses a metric that aims to quantitative the state's change in relation to the overall United State's change. So, each state has a value "Difference from US," which is the change in the individuals state's unemployment rate for the respective administration subtracted by the United State's change in unemployment rate for the same administration. 
+
+First, these values were plotted with a Cleveland Dot plot to see if there are overall trends with unemployment rate. Recall, a lower unemployment rate is better, so a lower difference from US is better as well. 
+
+```{r}
+#| fig-height: 10
+#| fig-width: 10
+library(readr)
+library(ggplot2)
+library(dplyr)
+library(tidyverse)
+library(tidytext)
+
+unemployement_us_avg <- read_csv("/Users/avagrey/political-party-impact/data/clean_preprocessed/unemployement_clean.csv")
+
+unemployement_us_avg <- unemployement_us_avg |>
+  mutate(administration = factor(
+    administration,
+    levels = c("Bush", "Obama", "Trump", "Biden")  
+  )) |> mutate(State_in_panel = reorder_within(State, dif_from_us, administration))
+
+unemployement_us_avg |> ggplot(aes(x = dif_from_us, y = State_in_panel, color = Vote)) + geom_point() +
+  facet_wrap(~administration, scales = "free_y") + scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue",
+      "United States" = "gray"
+    )) + scale_y_reordered() + labs(y = "State", x = "Average Unemployement Rate",
+                                    title = "Difference from US Change in Unemployement Rate Throughout 21st Century Across Administrations")
+```
+Under Obama, Trump, and Biden there are clear differences with safe red and safe blue state outcomes under the opposite party. Under Democratic presidents (Obama and Biden), Republican states experience smaller or no improvement in unemployment rate compared to the US average. In fact, it seems that most of the top half of the states that perform worse than the US average are Republican states. Similarly, under Trump, the state's that perform the worst compared to the US average are all Democratic states. Additionally, under Obama, Trump, and Biden, safe state's seem to see a larger decrease in unemployment rate compared to the US average under their respective administration. While Bush does not have an as strong pattern, the majority of states that see a greater reduction in unemployment rate compared to the US average are Republican states. 
+
+
+It is also helpful to understand this patterns more generally rather than at a state and administration level.
+```{r}
+rate_colors <- c("#008837", "#7b3294")
+
+mosaic2 <- unemployement_us_avg |>
+  mutate(Change = ifelse(dif_from_us <= 0, "Decrease", "Increase"))|>
+  mutate(Administration = case_when(
+    administration == "Biden" ~ "Democrat",
+    administration == "Obama" ~ "Democrat",
+    administration == "Trump" ~ "Republican",
+    administration == "Bush" ~ "Republican"
+  ))|>
+  select(Vote, Change, Administration) |> 
+  group_by(Vote, Change, Administration) |>
+  summarize(Freq = n()) |> ungroup() 
+
+vcd::mosaic(Change ~ Vote + Administration, mosaic2, direction = c("v", "v", "h"),
+            highlighting_fill = rate_colors)
+
+```
+
+This mosaic plot looks at the frequency of states that perform better or worse compared to the US average. Interestingly, while the Cleveland Dot plot showed that the political party the safe state voted for impacted their unemployment rate change, the mosaic plot communicates a slightly different pattern. The plot above shows that Republican states greater experience impact on their unemployment rate depending on the administration's party while Democratic states' do not. Under Republican presidents, Republican state's unemployment rate mostly go down compared to the US average while under Democratic presidents it tends to go up. Comparatively, Democratic States experience little-to-no difference in their unemployment rate compared to the US average regardless of the administration's party. 
+
+
+It may be helpful to geographically plot unemployment rate change from US average to see if there are geographical patterns.
+
+```{r}
+library(scales)
+library(usmap)
+library(dplyr)
+library(ggplot2)
+library(scales)
+
+unemployement_us_avg <- unemployement_us_avg |>
+  mutate(
+    state = State  
+  )
+
+lim <- max(abs(unemployement_us_avg$dif_from_us), na.rm = TRUE)
+
+four_maps <- plot_usmap(
+  regions = "states",
+  data = unemployement_us_avg,
+  values = "dif_from_us"
+) +
+  facet_wrap(~ administration, ncol = 2) +
+  scale_fill_gradient2(
+    name     = "State − US change",
+    low      = "#008837",
+    high     = "#7b3294",
+    midpoint = 0,
+    limits   = c(-lim, lim),
+    oob      = scales::squish,
+    na.value = "grey90"
+  ) +
+  theme_minimal()
+
+four_maps$data <- four_maps$data |> 
+  filter(!is.na(administration))
+
+four_maps <- four_maps +
+  coord_sf(datum = NA) +  
+  theme(
+    panel.grid.major = element_blank(),
+    panel.grid.minor = element_blank()
+  )
+
+four_maps
+```
+
+It is clear that the middle of the country has strong changes across administrations. Specifically, states like Wyoming, Nebraska, Utah, South and North Dakota, and Kansas have strong differences. Under Republican administrations these state's perform better and under Democratic administrations they perform worse. While this makes sense because they are Republican safe states, it is also interesting that the degree they perform differently. The darkest part of the country for each administration (regardless of direction), is the middle of the country. 
+
+
+This pattern is clearly seen with a head map by standard deviation of Unemployment rate change compared to the United States Average. 
+
+```{r}
+state_order <- unemployement_us_avg |>
+  group_by(State) %>%
+  summarise(var_gap = sd(dif_from_us, na.rm = TRUE), .groups = "drop") %>%
+  arrange(var_gap) |>
+  pull(State)
+
+lim <- max(abs(unemployement_us_avg$dif_from_us), na.rm = TRUE)
+
+difference_visual <- ggplot(
+  unemployement_us_avg,
+  aes(x = administration,
+      y = factor(State, levels = state_order),  
+      fill = dif_from_us)
+) +
+  geom_tile(color = "white") +
+  labs(title = "State − U.S. unemployment gap by administration",
+       x = NULL, y = NULL) +
+  scale_fill_gradient2(
+    name = "State − US change",
+    low = "#008837", mid = "white", high = "#7b3294",
+    midpoint = 0,
+    limits = c(-lim, lim),
+    labels = label_percent(accuracy = 0.001),   
+    na.value = "grey90"
+  ) +
+  theme_bw() +
+  theme(panel.grid = element_blank())
+
+difference_visual
+```
+
+This heat map reinforces the same idea as the geographical plots, many states in the middle of the country, like Wyoming, Nebraska, South Dakota, North Dakota, and Utah, see the largest unemployment differences across administration. Besides an outlier like Hawaii, the majority of the top states are Republican (affirms the mosaic plot) and located in the middle of the country. Comparatively, many East Coast and coastal states, like Delaware, Massachusetts, Oregon, Vermont, and New Jersey, experience very little change in their unemployment rate regardless of the political party in office. 
+
+
+## Median Income
+
+The next variable is Median Household Income. First, it is important to understand median income for state's in each political party since richer State's tend to vote Democrat ^[See Andrew Gelman et al., *Red State, Blue State, Rich State, Poor State: Why Americans Vote the Way They Do* (Princeton University Press, 2009).].
+
+```{r}
+library(ggrepel)
+
+median_income <- read_csv("/Users/avagrey/political-party-impact/data/clean_preprocessed/median_income_clean.csv")
+
+median_income <- median_income|> 
+  pivot_longer(`2001`:`2024`, names_to = 'year_income', values_to = 'values')
+
+outliers <- median_income |>
+  group_by(vote, year_income) |>
+  mutate(
+    Q1  = quantile(values, 0.25, na.rm = TRUE),
+    Q3  = quantile(values, 0.75, na.rm = TRUE),
+    IQR = Q3 - Q1,
+    lower = Q1 - 1.5 * IQR,
+    upper = Q3 + 1.5 * IQR,
+    is_outlier = values < lower | values > upper
+  ) |>
+  filter(is_outlier) |>
+  distinct(State, vote, year_income, values, .keep_all = TRUE)
+
+median_income |>
+  ggplot(aes(x = vote, y = values, fill = vote)) +
+  geom_boxplot(alpha = 0.7, outlier.shape = NA) +  
+  
+  geom_point(
+    data = outliers,
+    aes(x = vote, y = values),
+    color = "black",
+    show.legend = FALSE
+  ) +
+  
+  geom_text_repel(
+    data = outliers,
+    aes(label = State, x = vote, y = values),
+    size = 3,
+    max.overlaps = 10,
+    show.legend = FALSE
+  ) +
+  
+  scale_fill_manual(values = c(
+    "Democrat"   = "blue",
+    "Republican" = "red"
+  )) +
+  facet_wrap(~ year_income) +
+  labs(x = "Vote", y = "Median Income") +
+  scale_y_continuous(labels = scales::comma)+
+  theme_minimal()
+
+```
+
+Throughout the 21st century from the beginning to the present, Democratic-voting states have a higher median income than Republican-voting states, which reinforces Dr. Gelman's book on wealth and voting preferences ^[See Andrew Gelman et al., *Red State, Blue State, Rich State, Poor State: Why Americans Vote the Way They Do* (Princeton University Press, 2009).]. Also, these values are adjusted for inflation in current dollars, so while Alaska is an outlier with their median income, the true value at the time was smaller. 
+
+Both Democratic and Republican states seemed to experience the same relative median income increase from 2001 to 2024, both of their median values increased by a similar amount. Also, it seems that both Republican and Democratic states have higher variability in 2024 compared to 2001. Both box plots in 2024 are longer and have longer whiskers, communicating that the data is more spread out. Specifically, both Democratic and Republican state's seem to skew more right in 2024 indicating a potential widening in wealth inequality among both sets of states.
+
+
+Plotting median income by year averaged for each set of states can be helpful to see more granular trends at a year-by-year basis. 
+
+```{r}
+median_income <- median_income |> 
+  group_by(Year, vote) |> 
+  summarise(avg = mean(median_income), .groups = "drop") 
+  
+median_income|>  
+  ggplot(aes(x = Year, y = avg, color = vote)) + 
+  geom_line() +
+  scale_color_manual(
+    values = c(
+      "Republican" = "red",
+      "Democrat"   = "blue")) + 
+      annotate("rect",
+           xmin = as.Date("2009-01-01"),
+           xmax = as.Date("2016-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2001-01-01"),
+           xmax = as.Date("2008-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+    annotate("rect",
+           xmin = as.Date("2017-01-01"),
+           xmax = as.Date("2020-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2021-01-01"),
+           xmax = as.Date("2025-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+  labs(
+    x = "Year",
+    y = "Average Median Income",
+    title = "Average Median Income by State Party")+
+    theme_minimal(base_size = 14) 
+```
+
+
+This plot again shows that Democratic State's earn more than Republican states. However, this plot is interesting since it shows the patterns in median income change for both sets of states are the same. Republican and Democratic states' median incomes change identically regardless of the administration's political party. For example, they both had strong increases during the latter part of Obama's term (2012-2016) and that growth continued with Trump prior to Covid (2017-2019). So, overall, there are not any indicators that show median income performance depends on the presidential party.
+
+
+However, since the two sets of states have median income values that are fairly different, it could be more insightful to plot relative growth. For example, indexing the average median income to better see how the two sets of state's perform relative to the start of the 21st century to try to identify smaller slope differences. 
+
+```{r}
+median_income <- median_income |>
+  group_by(vote) |> 
+  arrange(Year) |> 
+  mutate(start_value = first(avg),
+         index = (avg / start_value) * 1) |> 
+  ungroup()
+
+slope_plot2 <- median_income |> 
+  ggplot(aes(x = Year, y = index, color = vote)) +
+  geom_line()+
+  annotate("rect",
+           xmin = as.Date("2009-01-01"),
+           xmax = as.Date("2016-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2001-01-01"),
+           xmax = as.Date("2008-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+    annotate("rect",
+           xmin = as.Date("2017-01-01"),
+           xmax = as.Date("2020-12-31"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightcoral", alpha = 0.2) +
+  annotate("rect",
+           xmin = as.Date("2021-01-01"),
+           xmax = as.Date("2025-01-01"),
+           ymin = -Inf, ymax = Inf,
+           fill = "lightblue", alpha = 0.2) +
+
+  scale_color_manual(values = c(
+    "Democrat"   = "blue",
+    "Republican" = "red"
+  )) +
+
+  labs(
+    x = "Year",
+    y = "Indexed Median Income",
+    title = "Relative Growth in Median Income by State Party Group"
+  )
+
+slope_plot2
+```
+
+When the average median income is indexed, smaller slope differences are easier to see. For example, during Bush and Trump (both red backgrounds), Democratic states had instances of higher relative median income, while Republican States never outperformed Democratic States. Additionally, both sets of states performed very similar under Obama, but near the end, and transitioning under Trump, Democratic State's began to perform a lot better. This pattern carried into Biden's term with Democratic State staying above Republican States. 
+
+
+## Personal Income, Disposable Personal Income, and Personal Consumption Expenditures
+
+This last section will explore three additional variables together: Personal Income, Disposable Personal Income, and Personal Consumption Expenditures. Also, since certain states may have higher values for various reasons not related to politics, the difference value for each state subtracted the US to obtain a more standardized measure for relative performance for these variables. 
+
+```{r}
+library(ggridges)
+various_factors <- read_csv("/Users/avagrey/political-party-impact/data/clean_preprocessed/various_factors_clean.csv")
+
+df_ridge <- various_factors |>
+  group_by(presidental_party, State) |>
+  summarise(
+    vote = first(vote),
+    dif_PC_PI_US  = mean(PC_PI_dif, na.rm = TRUE),
+    dif_PC_DPI_US = mean(PC_DPI_dif, na.rm = TRUE),
+    dif_PC_PCE_US = mean(PC_PCE_dif, na.rm = TRUE),
+    .groups = "drop"
+  ) |>
+  pivot_longer(
+    cols = starts_with("dif_"),
+    names_to = "variable",
+    values_to = "value"
+  )
+
+ggplot(df_ridge, 
+       aes(x = value, 
+           y = variable, 
+           fill = vote)) +
+  geom_density_ridges(alpha = 0.6, scale = 1) +
+  scale_fill_manual(values = c("Democrat" = "blue",
+                               "Republican" = "red")) +
+  ggtitle("Distribution of State-Level Economic Differences") +
+  xlab("Value") +
+  ylab("Economic Variable") +
+  facet_wrap(~ presidental_party)+
+  theme_minimal()
+```
+
+While there are not huge differences between Democrat and Republican administrations on the different state's, it is clear that under Republican presidents, Republican state's have larger positive tails. This indicates that there are more Republican state's that perform better than the US than they would under Democratic presidents. For example, there is a strong positive tail for Personal Income and Disposable Personal Income for Republican States under Republican administrations. Alternatively, some Democratic states have longer negative tails under Republican administrations. For Personal Income and Disposable Personal Income there are left tails that go farther out than any Republican states. However, for the most part, Republican state distributions are farther negative (peforming worse compared to the US), compared to Democratic states. 
+
+```{r}
+data_ready <- various_factors |>
+  group_by(administration) |>
+  mutate(
+    outlier_label = ifelse(
+      (PC_PCE_dif > 3800 | PC_DPI_dif > 5800),
+      State,
+      NA
+    )
+  ) |>
+  ungroup()
+
+
+
+data_ready$administration <- factor(
+  data_ready$administration,
+  levels = c("Bush", "Obama", "Trump", "Biden")
+)
+
+ggplot(data_ready, aes(
+    x = PC_DPI_dif, 
+    y = PC_PCE_dif, 
+    color = vote
+)) +
+  geom_point(size = 2, alpha = 0.8) +
+
+  # ---- NEW PART: LABEL OUTLIERS ----
+  geom_text_repel(
+    aes(label = outlier_label),
+    size = 3,
+    max.overlaps = Inf,
+    box.padding = 0.4,
+    point.padding = 0.2,
+    min.segment.length = 0
+  ) +
+
+  facet_wrap(~ administration) +
+  scale_color_manual(
+    values = c("Republican" = "#D62728", "Democrat" = "#1F77B4")
+  ) +
+  theme_bw() +
+  labs(
+    x = "Per Capita Disposable Personal Income Difference (vs US)",
+    y = "Per Capita Consumption Expenditures Difference (vs US)",
+    title = "State Differences in PCE vs DPI by Administration"
+  )
+```
+
+These plots aim to understand State's Disposable Income and Personal Consumption Expenditures, which can give insight into State household economic resources. For all four administrations, there are clear clustering between Democrat and Republican States. Overall, Democratic states tend to have higher Disposable Income and Personal Consumption Expenditures. However, under Trump and Bush the difference is smaller. Specifically, under Bush more Republican states have larger Disposable Income, and under Trump the state's are a lot closer together. 
+
+Additionally, it is interesting how the District of Columbia and Wyoming are consistent outlines for Personal Consumption Expenditures and Disposable Income, respectively, across multiple administrations.  
+
+
+```{r}
+#| fig-height: 10
+#| fig-width: 15
+library(dplyr)
+library(ggplot2)
+
+# ------------------------------------
+# 1. Collapse administrations into two groups
+#    and average differences per state
+# ------------------------------------
+
+admin_groups <- various_factors |>
+  mutate(
+    admin_party = case_when(
+      administration %in% c("Bush", "Trump") ~ "Republican Administration",
+      administration %in% c("Obama", "Biden") ~ "Democratic Administration"
+    )
+  ) |>
+  group_by(State, vote, admin_party) |>
+  summarise(
+    PC_PCE_dif = mean(PC_PCE_dif, na.rm = TRUE),
+    PC_DPI_dif = mean(PC_DPI_dif, na.rm = TRUE),
+    PC_PI_dif  = mean(PC_PI_dif,  na.rm = TRUE),
+    .groups = "drop"
+  )
+
+# ------------------------------------
+# 2. Standardize values for PCA
+# ------------------------------------
+
+admin_groups_scaled <- admin_groups |>
+  mutate(across(starts_with("PC_"), ~ scale(.x)[,1]))
+
+# ------------------------------------
+# 3. Run PCA ONCE on the averaged data
+# ------------------------------------
+
+pca_all <- prcomp(admin_groups_scaled[, 4:6], scale. = TRUE)
+
+# ------------------------------------
+# 4. Extract PCA scores for plotting
+# ------------------------------------
+
+scores <- as.data.frame(pca_all$x)
+scores$State       <- admin_groups_scaled$State
+scores$vote        <- admin_groups_scaled$vote
+scores$admin_party <- admin_groups_scaled$admin_party
+scores$color       <- ifelse(scores$vote == "Democrat", "blue", "red")
+
+# ------------------------------------
+# 5. Extract PCA variable loadings
+# ------------------------------------
+
+loadings <- as.data.frame(pca_all$rotation[, 1:2])
+loadings$variable <- rownames(loadings)
+
+# ------------------------------------
+# 6. PCA Biplot: one point per state per facet
+# ------------------------------------
+# ------------------------------------
+# Compute automatic scaling factor for arrows
+# ------------------------------------
+
+# Range of PCA scores
+score_range <- max(
+  range(scores$PC1), 
+  range(scores$PC2)
+)
+
+# Max loading length
+loading_range <- max(
+  sqrt(loadings$PC1^2 + loadings$PC2^2)
+)
+
+# Compute scale factor so arrows fit nicely inside the plot
+arrow_scale <- score_range / loading_range * 0.3   # 0.3 = ideal visual size
+
+# ------------------------------------
+# PCA Biplot with auto-scaled arrows
+# ------------------------------------
+
+ggplot(scores, aes(x = PC1, y = PC2)) +
+
+  # Points
+  geom_point(aes(color = color), size = 3, alpha = 0.8) +
+
+  # Labels matching color
+  geom_text(aes(label = State, color = color),
+            size = 2.5, vjust = -0.6) +
+
+  # Auto-scaled PCA arrows
+  geom_segment(data = loadings,
+               aes(x = 0, y = 0,
+                   xend = PC1 * arrow_scale,
+                   yend = PC2 * arrow_scale),
+               arrow = arrow(length = unit(0.25, "cm")),
+               color = "darkblue") +
+
+  geom_text(data = loadings,
+            aes(x = PC1 * arrow_scale, 
+                y = PC2 * arrow_scale, 
+                label = variable),
+            color = "darkblue", size = 3, vjust = -0.4) +
+
+  scale_color_identity() +
+  facet_wrap(~ admin_party) +
+  theme_minimal() +
+  labs(
+    title = "PCA of State-Level Economic Differences",
+    subtitle = "Arrows auto-scaled; Bush+Trump vs Obama+Biden averages",
+    x = "PC1",
+    y = "PC2"
+  )
+
+
+```
+
+These biplots map the same PCA lines but adjust the location of the States to see specific trends across different political administrations. Under Republican administrations there are clearer clusters specifically for Republican States. States like Oklahoma, North Dakota, South Dakota, and Wyoming are very high on DPI and PI, while there is a cluster of red states lower. Additionally, very few Republican states are high on variables under Democratic administrations. Under Democratic administrations, Democratic states perform well, specifically for PCE.
+
+Looking at clusters, larger, more populated states, like California, New York, Massachusetts, are bigger outliers under Democratic administrations. Comparatively, under Republican administrates they tend to be closer with other states. 
+
+Also, the cluster of Oklahoma, North Dakota, South Dakota, and Wyoming, related back to the findings on middle of the country states. They are higher on income related factors like PI and DPI under republican administrations which could indicate again those state's benefit under Republican administration because of their geographical location. 
