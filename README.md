@@ -1,5 +1,5 @@
 This project will explore economic statistics (unemployment rate, median household income, personal income, personal disposable income, and personal consumption expenditures) for safe states at the state-by-state level from 2001 to 2024 (covering the Bush, Obama, Trump, and Biden administrations). Safe states are states that have voted for the same party every presidential election throughout the twenty-first century. The goal of this project is to explore whether a state that consistently votes for the same party in every presidential election experiences stronger economic outcomes during that party’s administrations compared to during the other party’s administrations. On a larger scale, this project aims to understand if political polarization is warranted, specifically, whether consistently voting for the same party aligns with measurable positive economic outcomes, or if states experience more similar economic trends than their political identities would suggest. The analysis will also analyze natural economic differences in Democratic and Republican states to help contextualize findings.
 
 
-
+The analysis and conclusions can be found at [https://avagreyyy4.github.io/political-party-impact/].
 

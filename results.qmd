@@ -37,7 +37,7 @@ unemployement_us_avg |>
       "United States" = "gray"
     )) + scale_y_reordered() + 
   labs(y = "State",
-       x = "Average Unemployement Rate",
+       x = "Relative Unemployment Rate Change",
        title = "Difference from US Change in Unemployement Rate Throughout 21st Century Across Administrations")
 ```
 Under Obama, Trump, and Biden, there are clear differences in safe red and safe blue state outcomes, depending on the administration and its party. Under Democratic presidents (Obama and Biden), Republican states experience less improvement or an increase in the relative unemployment rate change. In fact, under Democratic administrations, most of the states that perform worse than the US average are Republican-voting states. Similarly, under Trump, the states that perform worse compared to the US average are all Democratic-voting states, indicated with many blue dots at the top of Trump's graph. Additionally, under Obama, Trump, and Biden, safe states seem to experience a larger decrease in the relative unemployment rate change during their respective administrations, with many red dots at the bottom of Trump's graph and many blue dots at the bottom of Obama's and Biden's. While Bush does not have as strong of a pattern, the majority of states that see a greater reduction in the relative unemployment rate change are Republican states, indicated with the majority of dots on the bottom being red.
@@ -61,8 +61,10 @@ mosaic2 <- unemployement_us_avg |>
   group_by(Vote, Change, Administration) |>
   summarize(Freq = n()) |> ungroup() 
 
-vcd::mosaic(Change ~ Vote + Administration, mosaic2, direction = c("v", "v", "h"),
-            highlighting_fill = rate_colors)
+vcd::mosaic(Change ~ Vote + Administration, mosaic2, 
+            direction = c("v", "v", "h"),
+            highlighting_fill = rate_colors,
+            main = "Binned Relative Unemployement Rate Change") 
 
 ```
 
@@ -94,7 +96,7 @@ four_maps <- plot_usmap(
 ) +
   facet_wrap(~ administration, ncol = 2) +
   scale_fill_gradient2(
-    name     = "State − US change",
+    name     = "Difference from US",
     low      = "#008837",
     high     = "#7b3294",
     midpoint = 0,
@@ -102,6 +104,9 @@ four_maps <- plot_usmap(
     oob      = scales::squish,
     na.value = "grey90"
   ) +
+  labs(
+    title = "Difference in Unemployment Rate Relative to the U.S. Average",
+    subtitle = "By Presidential Administration")+
   theme_minimal()
 
 four_maps$data <- four_maps$data |> 
@@ -208,6 +213,8 @@ median_income |>
   facet_wrap(~ year_income) +
   labs(x = "Vote", y = "Median Income") +
   scale_y_continuous(labels = scales::comma)+
+  labs(title = "Distribution of Average Median Income Across State Vote",
+       subtitle = "For the Year 2001 and 2024")+
   theme_minimal()
 
 ```
@@ -317,7 +324,7 @@ When the average median income is indexed, smaller slope differences are easier 
 
 ## Personal Income, Disposable Personal Income, and Personal Consumption Expenditures
 
-This last section will explore three additional variables together: personal income, disposable personal income, and personal consumption expenditures. Also, since certain states may have higher values for various reasons not related to politics, the difference value for each state subtracted from the US difference was used to obtain a more standardized measure for relative performance. Also, for these variables a negative value indicates worse peformance, while a positive value reflects positive economic changes.
+This last section will explore three additional variables together: personal income, disposable personal income, and personal consumption expenditures. Each of these variables are per capita, so they are adjusted for the population of each state. Also, since certain states may have higher values for various reasons not related to politics, the difference value for each state subtracted from the US difference was used to obtain a more standardized measure for relative performance. Also, for these variables a negative value indicates worse peformance, while a positive value reflects positive economic changes.
 
 ```{r}
 library(ggridges)
@@ -454,6 +461,14 @@ scores$color       <- ifelse(scores$vote == "Democrat", "blue", "red")
 loadings <- as.data.frame(pca_all$rotation[, 1:2])
 loadings$variable <- rownames(loadings)
 
+loadings$variable <- recode(
+  loadings$variable,
+  "PC_PCE_dif" = "PCE Difference",
+  "PC_DPI_dif" = "DPI Difference",
+  "PC_PI_dif"  = "PI Difference"
+)
+
+
 
 score_range <- max(
   range(scores$PC1), 
@@ -481,8 +496,8 @@ ggplot(scores, aes(x = PC1, y = PC2)) +
                color = "black") +
 
   geom_text(data = loadings,
-            aes(x = PC1 * arrow_scale, 
-                y = PC2 * arrow_scale, 
+            aes(x = PC1 * arrow_scale*1.05, 
+                y = PC2 * arrow_scale*1.05, 
                 label = variable),
             color = "black", size = 3) +
 
