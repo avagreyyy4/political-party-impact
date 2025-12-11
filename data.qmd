@@ -2,7 +2,7 @@
 
 ## Description
 
-The data for this project has been pulled from various government databases. The first data set is from the Rhode Island Department of Labor and Training, which contains the unemployment rate for each state from 2000 to 2024 ([Unemployment Rate by State](https://dlt.ri.gov/labor-market-information)). The dataset has 25 columns, including “State” and the years 2000 through 2024, and 52 rows, including all fifty states, the District of Columbia, and the United States average. These values were obtained from the United States Census. The United States Census acquires yearly state-by-state economic data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values^[See U.S. Census Bureau, “How the Data Are Collected,” n.d., https://www.census.gov/programs-surveys/gov-finances/technical-documentation/methodology/how-the-data-are-collected.html.].
+The data for this project has been pulled from various government databases. The first dataset is from the Rhode Island Department of Labor and Training, which contains the unemployment rate for each state from 2000 to 2024 ([Unemployment Rate by State](https://dlt.ri.gov/labor-market-information)). The dataset has 25 columns, including “State” and the years 2000 through 2024, along with 52 rows, including all fifty states, the District of Columbia, and the United States average. These values were obtained from the United States Census. The United States Census acquires yearly state-by-state economic data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values^[See U.S. Census Bureau, “How the Data Are Collected,” n.d., https://www.census.gov/programs-surveys/gov-finances/technical-documentation/methodology/how-the-data-are-collected.html.].
 
 The second dataset, from the Federal Reserve Bank of St. Louis (FRED), contains median household income data for each state from 2001 to 2024 ([Median Income by State](https://fred.stlouisfed.org/release/tables?eid=259515&rid=249)). The dataset has 53 columns, including “Year”, all 50 states, the District of Columbia, and the United States average, along with 23 rows spanning 2001 through 2024. The Federal Reserve Bank of St. Louis aggregated these yearly values from the United States Census.
 
@@ -10,11 +10,11 @@ The last dataset is from the United States Bureau of Economic Analysis and conta
 
 Additional variables from the United States Bureau of Economic Analysis were not included in the exploratory data analysis due to limitations in handling missing values and in quantitative comparisons. For example, while GDP measures a state's economic output, smaller states will inherently have lower GDP, making comparisons free of confounding variables difficult.
 
-This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis will create features to standardize for these differences. For example, creating variables in relation to the US average in order to identify differences in relative values, not raw values. Additionally, both median income and per-capita variables are derived from survey-based estimates and may therefore not perfectly reflect the true behavior of each population.
+This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis will create features to standardize for these differences. For example, creating variables in relation to the US average in order to identify differences in relative values, not raw values. Additionally, both median income and per-capita variables are derived from survey-based estimates and may therefore not perfectly reflect the true behavior of each state population.
 
 ## Missing value analysis
 
-The only dataset with missing values is the United States Bureau of Economic Analysis which contains data across states and years on various economic factors. Since the unemployment rate and median income data sets do not contain and missing values, they will not be explored in this section for simplicity. 
+The only dataset with missing values is the United States Bureau of Economic Analysis which contains data across states and years on various economic factors. Since the unemployment rate and median income datasets do not contain any missing values, they will not be explored in this section for simplicity. 
 
 ```{r}
 #| fig-width: 13
@@ -68,5 +68,5 @@ various_factors |>
   scale_x_continuous(breaks = c(2001, 2012, 2024))
 ```
 
-This plot summarizes the percentage of missing values for each variable in each year, averaged across all states. It is clear from this plot that for every state, the same eight years are missing the same four variables. The only two percentages visualized are 100% and 0%. It seems that data for the missing variables were not recorded at the beginning of the 21st century. Also, potentially, the data was pulled before 2024 was recorded. 
+This plot summarizes the percentage of missing values for each variable in each year, averaged across all states. It is clear from this plot that for every state, the same eight years are missing the same four variables. The only two percentages visualized are 100% and 0%. It seems that data for the missing variables were not recorded at the beginning of the twenty-first century. Also, potentially, the data was pulled before 2024 was recorded. 
 
