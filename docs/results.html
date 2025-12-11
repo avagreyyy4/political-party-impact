@@ -185,6 +185,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
   <li><a href="#unemployement-rate" id="toc-unemployement-rate" class="nav-link active" data-scroll-target="#unemployement-rate"><span class="header-section-number">3.1</span> Unemployement Rate</a></li>
   <li><a href="#median-income" id="toc-median-income" class="nav-link" data-scroll-target="#median-income"><span class="header-section-number">3.2</span> Median Income</a></li>
   <li><a href="#personal-income-disposable-personal-income-and-personal-consumption-expenditures" id="toc-personal-income-disposable-personal-income-and-personal-consumption-expenditures" class="nav-link" data-scroll-target="#personal-income-disposable-personal-income-and-personal-consumption-expenditures"><span class="header-section-number">3.3</span> Personal Income, Disposable Personal Income, and Personal Consumption Expenditures</a></li>
+  <li><a href="#summary" id="toc-summary" class="nav-link" data-scroll-target="#summary"><span class="header-section-number">3.4</span> Summary</a></li>
   </ul>
 <div class="toc-actions"><ul><li><a href="https://github.com/avagreyyy4/political-party-impact/edit/main/results.qmd" class="toc-action"><i class="bi bi-github"></i>Edit this page</a></li><li><a href="https://github.com/avagreyyy4/political-party-impact/issues/new" class="toc-action"><i class="bi empty"></i>Report an issue</a></li></ul></div></nav>
     </div>
@@ -213,8 +214,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>This section summarizes key findings from each dataset, identifying trends across economic factors and safe states.</p>
 <section id="unemployement-rate" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="unemployement-rate"><span class="header-section-number">3.1</span> Unemployement Rate</h2>
-<p>The first variable of interest is Unemployment Rate. To understand presidential impact, the variable change was created. Change is defined as the unemployment rate of the state the last year the respective president was in office subtracted from the first year they took office. Naturally, certain states have lower unemployment rates for reasons related to population size, specific industries, or age of workforce. To account for these difference, the analysis uses a metric that aims to quantitative the state’s change in relation to the overall United State’s change. So, each state has a value “Difference from US,” which is the change in the individuals state’s unemployment rate for the respective administration subtracted by the United State’s change in unemployment rate for the same administration.</p>
-<p>First, these values were plotted with a Cleveland Dot plot to see if there are overall trends with unemployment rate. Recall, a lower unemployment rate is better, so a lower difference from US is better as well.</p>
+<p>The first variable of interest is the Unemployment Rate. To quantify the impact of each presidency, a variable ‘change’ was created. Change is defined as the state’s unemployment rate in the last year the respective president was in office, subtracted from the first year they took office. Naturally, certain states have lower unemployment rates for reasons related to population size, specific industries, or the age of the workforce. To account for these differences, the analysis uses a metric that quantifies the state’s change relative to the overall change in the United States. So, each state has a value “Difference from US,” which is the change in the individual state’s unemployment rate for the respective administration, subtracted by the United States’ change in unemployment rate for the same administration.</p>
+<p>First, “Difference from US” was plotted with a Cleveland Dot plot to see if there are overall trends with unemployment rate by state and administration. Recall, a lower unemployment rate is better, so a lower difference from US is better as well.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -249,7 +250,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Under Obama, Trump, and Biden there are clear differences with safe red and safe blue state outcomes under the opposite party. Under Democratic presidents (Obama and Biden), Republican states experience smaller or no improvement in unemployment rate compared to the US average. In fact, it seems that most of the top half of the states that perform worse than the US average are Republican states. Similarly, under Trump, the state’s that perform the worst compared to the US average are all Democratic states. Additionally, under Obama, Trump, and Biden, safe state’s seem to see a larger decrease in unemployment rate compared to the US average under their respective administration. While Bush does not have an as strong pattern, the majority of states that see a greater reduction in unemployment rate compared to the US average are Republican states.</p>
+<p>Under Obama, Trump, and Biden, there are clear differences in safe red and safe blue state outcomes under the opposite party. Under Democratic presidents (Obama and Biden), Republican states experience smaller or no improvement in the unemployment rate compared to the US average. In fact, most of the top half of states that perform worse than the US average are Republican-voting. Similarly, under Trump, the states that perform worse compared to the US average are all Democratic-voting. Additionally, under Obama, Trump, and Biden, safe states seem to experience a larger decrease in the unemployment rate than the US average during their respective administrations, with many red dots at the bottom of Trump’s graph and many blue dots at the bottom of Obama’s and Biden’s. While Bush does not have as strong of a pattern, the majority of states that see a greater reduction in the unemployment rate than the US average are Republican states.</p>
 <p>It is also helpful to understand this patterns more generally rather than at a state and administration level.</p>
 <div class="cell">
 <details class="code-fold">
@@ -279,7 +280,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>This mosaic plot looks at the frequency of states that perform better or worse compared to the US average. Interestingly, while the Cleveland Dot plot showed that the political party the safe state voted for impacted their unemployment rate change, the mosaic plot communicates a slightly different pattern. The plot above shows that Republican states greater experience impact on their unemployment rate depending on the administration’s party while Democratic states’ do not. Under Republican presidents, Republican state’s unemployment rate mostly go down compared to the US average while under Democratic presidents it tends to go up. Comparatively, Democratic States experience little-to-no difference in their unemployment rate compared to the US average regardless of the administration’s party.</p>
+<p>This mosaic plot shows the frequency of states whose unemployment rate changes increase or decrease relative to the US, grouped by the administration’s party and the state’s voting preference. Interestingly, while the Cleveland Dot plot showed that the political party the safe state voted for affected its unemployment rate change, the mosaic plot shows a slightly different pattern.</p>
+<p>The plot above shows that unemployment in Republican states fluctuates depending on the political party of the administration, while unemployment in Democratic states remains stable. Under Republican presidents, Republican states’ unemployment rates mostly go down compared to the US average, while under Democratic presidents, they tend to go up. This indicates a strong relationship between the administration’s party and the unemployment rate in Republican states. Compared with the US average, Democratic States experience little to no difference in their unemployment rates, regardless of the administration’s party.</p>
 <p>It may be helpful to geographically plot unemployment rate change from US average to see if there are geographical patterns.</p>
 <div class="cell">
 <details class="code-fold">
@@ -334,13 +336,13 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>It is clear that the middle of the country has strong changes across administrations. Specifically, states like Wyoming, Nebraska, Utah, South and North Dakota, and Kansas have strong differences. Under Republican administrations these state’s perform better and under Democratic administrations they perform worse. While this makes sense because they are Republican safe states, it is also interesting that the degree they perform differently. The darkest part of the country for each administration (regardless of direction), is the middle of the country.</p>
-<p>This pattern is clearly seen with a head map by standard deviation of Unemployment rate change compared to the United States Average.</p>
+<p>The plot above communicates that states in the middle of the country have a greater change in unemployment rate difference across administrations. Specifically, states like Wyoming, Nebraska, Utah, South Dakota, North Dakota, and Kansas have clear positive and negative differences. Under Republican administrations, these states perform better, and under Democratic administrations, they perform worse. While this makes sense because they are Republican-safe states, it is also interesting that they seem to fluctuate more than other safe red states, turning dark green during Republican administrations and dark purple during Democratic administrations.</p>
+<p>A heat map showing the standard deviation of unemployment-rate changes relative to the U.S. average further supports this pattern.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb4"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a>state_order <span class="ot">&lt;-</span> unemployement_us_avg <span class="sc">|&gt;</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(State) <span class="sc">%&gt;%</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(State) <span class="sc">|&gt;</span></span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(<span class="at">var_gap =</span> <span class="fu">sd</span>(dif_from_us, <span class="at">na.rm =</span> <span class="cn">TRUE</span>), <span class="at">.groups =</span> <span class="st">"drop"</span>) <span class="sc">%&gt;%</span></span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">arrange</span>(var_gap) <span class="sc">|&gt;</span></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pull</span>(State)</span>
@@ -377,7 +379,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>This heat map reinforces the same idea as the geographical plots, many states in the middle of the country, like Wyoming, Nebraska, South Dakota, North Dakota, and Utah, see the largest unemployment differences across administration. Besides an outlier like Hawaii, the majority of the top states are Republican (affirms the mosaic plot) and located in the middle of the country. Comparatively, many East Coast and coastal states, like Delaware, Massachusetts, Oregon, Vermont, and New Jersey, experience very little change in their unemployment rate regardless of the political party in office.</p>
+<p>This heat map reinforces the same idea as the geographical plots; many states in the middle of the country, like Wyoming, Nebraska, South Dakota, North Dakota, and Utah, show the largest unemployment differences across administrations. Besides an outlier like Hawaii, the majority of the top states are Republican (as shown in the mosaic plot) and are located in the middle of the country. Comparatively, many East Coast and coastal states, such as Delaware, Massachusetts, Oregon, Vermont, and New Jersey, have unemployment rates that change very little regardless of the political party in office.</p>
 </section>
 <section id="median-income" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="median-income"><span class="header-section-number">3.2</span> Median Income</h2>
@@ -482,7 +484,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb6-33"><a href="#cb6-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
 <span id="cb6-34"><a href="#cb6-34" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Average Median Income"</span>,</span>
 <span id="cb6-35"><a href="#cb6-35" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Average Median Income by State Party"</span>)<span class="sc">+</span></span>
-<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>(<span class="at">base_size =</span> <span class="dv">14</span>) </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb6-36"><a href="#cb6-36" aria-hidden="true" tabindex="-1"></a>    <span class="fu">theme_minimal</span>() </span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -537,7 +539,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb7-38"><a href="#cb7-38" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
 <span id="cb7-39"><a href="#cb7-39" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Indexed Median Income"</span>,</span>
 <span id="cb7-40"><a href="#cb7-40" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Relative Growth in Median Income by State Party Group"</span></span>
-<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb7-41"><a href="#cb7-41" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span>   <span class="fu">theme_minimal</span>()</span>
 <span id="cb7-42"><a href="#cb7-42" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb7-43"><a href="#cb7-43" aria-hidden="true" tabindex="-1"></a>slope_plot2</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
@@ -568,25 +570,28 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a>    <span class="at">dif_PC_DPI_US =</span> <span class="fu">mean</span>(PC_DPI_dif, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    <span class="at">dif_PC_PCE_US =</span> <span class="fu">mean</span>(PC_PCE_dif, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="fu">starts_with</span>(<span class="st">"dif_"</span>),</span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>  )</span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_ridge, </span>
-<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> value, </span>
-<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> variable, </span>
-<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> vote)) <span class="sc">+</span></span>
-<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">scale =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
-<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Democrat"</span> <span class="ot">=</span> <span class="st">"blue"</span>,</span>
-<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"Republican"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
-<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Distribution of State-Level Economic Differences"</span>) <span class="sc">+</span></span>
-<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Value"</span>) <span class="sc">+</span></span>
-<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Economic Variable"</span>) <span class="sc">+</span></span>
-<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> presidental_party)<span class="sc">+</span></span>
-<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span>  </span>
+<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">"Personal Income"</span> <span class="ot">=</span> <span class="st">'dif_PC_PI_US'</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Disposable Income"</span> <span class="ot">=</span> <span class="st">'dif_PC_DPI_US'</span>,</span>
+<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Personal Consumption Expenditures"</span> <span class="ot">=</span> <span class="st">'dif_PC_PCE_US'</span>) <span class="sc">|&gt;</span></span>
+<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="st">`</span><span class="at">Personal Income</span><span class="st">`</span><span class="sc">:</span><span class="st">`</span><span class="at">Personal Consumption Expenditures</span><span class="st">`</span>,</span>
+<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
+<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
+<span id="cb8-20"><a href="#cb8-20" aria-hidden="true" tabindex="-1"></a>  ) </span>
+<span id="cb8-21"><a href="#cb8-21" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb8-22"><a href="#cb8-22" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(df_ridge, </span>
+<span id="cb8-23"><a href="#cb8-23" aria-hidden="true" tabindex="-1"></a>       <span class="fu">aes</span>(<span class="at">x =</span> value, </span>
+<span id="cb8-24"><a href="#cb8-24" aria-hidden="true" tabindex="-1"></a>           <span class="at">y =</span> variable, </span>
+<span id="cb8-25"><a href="#cb8-25" aria-hidden="true" tabindex="-1"></a>           <span class="at">fill =</span> vote)) <span class="sc">+</span></span>
+<span id="cb8-26"><a href="#cb8-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_density_ridges</span>(<span class="at">alpha =</span> <span class="fl">0.6</span>, <span class="at">scale =</span> <span class="dv">1</span>) <span class="sc">+</span></span>
+<span id="cb8-27"><a href="#cb8-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_manual</span>(<span class="at">values =</span> <span class="fu">c</span>(<span class="st">"Democrat"</span> <span class="ot">=</span> <span class="st">"blue"</span>,</span>
+<span id="cb8-28"><a href="#cb8-28" aria-hidden="true" tabindex="-1"></a>                               <span class="st">"Republican"</span> <span class="ot">=</span> <span class="st">"red"</span>)) <span class="sc">+</span></span>
+<span id="cb8-29"><a href="#cb8-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggtitle</span>(<span class="st">"Distribution of State-Level Economic Differences"</span>) <span class="sc">+</span></span>
+<span id="cb8-30"><a href="#cb8-30" aria-hidden="true" tabindex="-1"></a>  <span class="fu">xlab</span>(<span class="st">"Value"</span>) <span class="sc">+</span></span>
+<span id="cb8-31"><a href="#cb8-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ylab</span>(<span class="st">"Economic Variable"</span>) <span class="sc">+</span></span>
+<span id="cb8-32"><a href="#cb8-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> presidental_party)<span class="sc">+</span></span>
+<span id="cb8-33"><a href="#cb8-33" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -662,113 +667,79 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb10"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
 <span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="co"># 1. Collapse administrations into two groups</span></span>
-<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a><span class="co">#    and average differences per state</span></span>
-<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>admin_groups <span class="ot">&lt;-</span> various_factors <span class="sc">|&gt;</span></span>
-<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
-<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">admin_party =</span> <span class="fu">case_when</span>(</span>
-<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>      administration <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Bush"</span>, <span class="st">"Trump"</span>) <span class="sc">~</span> <span class="st">"Republican Administration"</span>,</span>
-<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>      administration <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Obama"</span>, <span class="st">"Biden"</span>) <span class="sc">~</span> <span class="st">"Democratic Administration"</span></span>
-<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    )</span>
-<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
-<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(State, vote, admin_party) <span class="sc">|&gt;</span></span>
-<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
-<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC_PCE_dif =</span> <span class="fu">mean</span>(PC_PCE_dif, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC_DPI_dif =</span> <span class="fu">mean</span>(PC_DPI_dif, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC_PI_dif  =</span> <span class="fu">mean</span>(PC_PI_dif,  <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
-<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a>admin_groups <span class="ot">&lt;-</span> various_factors <span class="sc">|&gt;</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(</span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">admin_party =</span> <span class="fu">case_when</span>(</span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>      administration <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Bush"</span>, <span class="st">"Trump"</span>) <span class="sc">~</span> <span class="st">"Republican Administration"</span>,</span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a>      administration <span class="sc">%in%</span> <span class="fu">c</span>(<span class="st">"Obama"</span>, <span class="st">"Biden"</span>) <span class="sc">~</span> <span class="st">"Democratic Administration"</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a>    )</span>
+<span id="cb10-10"><a href="#cb10-10" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span></span>
+<span id="cb10-11"><a href="#cb10-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(State, vote, admin_party) <span class="sc">|&gt;</span></span>
+<span id="cb10-12"><a href="#cb10-12" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarise</span>(</span>
+<span id="cb10-13"><a href="#cb10-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC_PCE_dif =</span> <span class="fu">mean</span>(PC_PCE_dif, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb10-14"><a href="#cb10-14" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC_DPI_dif =</span> <span class="fu">mean</span>(PC_DPI_dif, <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb10-15"><a href="#cb10-15" aria-hidden="true" tabindex="-1"></a>    <span class="at">PC_PI_dif  =</span> <span class="fu">mean</span>(PC_PI_dif,  <span class="at">na.rm =</span> <span class="cn">TRUE</span>),</span>
+<span id="cb10-16"><a href="#cb10-16" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb10-17"><a href="#cb10-17" aria-hidden="true" tabindex="-1"></a>  )</span>
+<span id="cb10-18"><a href="#cb10-18" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-19"><a href="#cb10-19" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-20"><a href="#cb10-20" aria-hidden="true" tabindex="-1"></a>admin_groups_scaled <span class="ot">&lt;-</span> admin_groups <span class="sc">|&gt;</span></span>
+<span id="cb10-21"><a href="#cb10-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">starts_with</span>(<span class="st">"PC_"</span>), <span class="sc">~</span> <span class="fu">scale</span>(.x)[,<span class="dv">1</span>]))</span>
+<span id="cb10-22"><a href="#cb10-22" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-23"><a href="#cb10-23" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a><span class="co"># 2. Standardize values for PCA</span></span>
-<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>admin_groups_scaled <span class="ot">&lt;-</span> admin_groups <span class="sc">|&gt;</span></span>
-<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>  <span class="fu">mutate</span>(<span class="fu">across</span>(<span class="fu">starts_with</span>(<span class="st">"PC_"</span>), <span class="sc">~</span> <span class="fu">scale</span>(.x)[,<span class="dv">1</span>]))</span>
-<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a><span class="co"># 3. Run PCA ONCE on the averaged data</span></span>
-<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>pca_all <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(admin_groups_scaled[, <span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>], <span class="at">scale. =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-24"><a href="#cb10-24" aria-hidden="true" tabindex="-1"></a>pca_all <span class="ot">&lt;-</span> <span class="fu">prcomp</span>(admin_groups_scaled[, <span class="dv">4</span><span class="sc">:</span><span class="dv">6</span>], <span class="at">scale. =</span> <span class="cn">TRUE</span>)</span>
+<span id="cb10-25"><a href="#cb10-25" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-26"><a href="#cb10-26" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-27"><a href="#cb10-27" aria-hidden="true" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca_all<span class="sc">$</span>x)</span>
+<span id="cb10-28"><a href="#cb10-28" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>State       <span class="ot">&lt;-</span> admin_groups_scaled<span class="sc">$</span>State</span>
+<span id="cb10-29"><a href="#cb10-29" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>vote        <span class="ot">&lt;-</span> admin_groups_scaled<span class="sc">$</span>vote</span>
+<span id="cb10-30"><a href="#cb10-30" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>admin_party <span class="ot">&lt;-</span> admin_groups_scaled<span class="sc">$</span>admin_party</span>
+<span id="cb10-31"><a href="#cb10-31" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>color       <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(scores<span class="sc">$</span>vote <span class="sc">==</span> <span class="st">"Democrat"</span>, <span class="st">"blue"</span>, <span class="st">"red"</span>)</span>
+<span id="cb10-32"><a href="#cb10-32" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-33"><a href="#cb10-33" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-34"><a href="#cb10-34" aria-hidden="true" tabindex="-1"></a>loadings <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca_all<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
+<span id="cb10-35"><a href="#cb10-35" aria-hidden="true" tabindex="-1"></a>loadings<span class="sc">$</span>variable <span class="ot">&lt;-</span> <span class="fu">rownames</span>(loadings)</span>
 <span id="cb10-36"><a href="#cb10-36" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a><span class="co"># 4. Extract PCA scores for plotting</span></span>
-<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>scores <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca_all<span class="sc">$</span>x)</span>
-<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>State       <span class="ot">&lt;-</span> admin_groups_scaled<span class="sc">$</span>State</span>
-<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>vote        <span class="ot">&lt;-</span> admin_groups_scaled<span class="sc">$</span>vote</span>
-<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>admin_party <span class="ot">&lt;-</span> admin_groups_scaled<span class="sc">$</span>admin_party</span>
-<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>scores<span class="sc">$</span>color       <span class="ot">&lt;-</span> <span class="fu">ifelse</span>(scores<span class="sc">$</span>vote <span class="sc">==</span> <span class="st">"Democrat"</span>, <span class="st">"blue"</span>, <span class="st">"red"</span>)</span>
+<span id="cb10-37"><a href="#cb10-37" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-38"><a href="#cb10-38" aria-hidden="true" tabindex="-1"></a>score_range <span class="ot">&lt;-</span> <span class="fu">max</span>(</span>
+<span id="cb10-39"><a href="#cb10-39" aria-hidden="true" tabindex="-1"></a>  <span class="fu">range</span>(scores<span class="sc">$</span>PC1), </span>
+<span id="cb10-40"><a href="#cb10-40" aria-hidden="true" tabindex="-1"></a>  <span class="fu">range</span>(scores<span class="sc">$</span>PC2)</span>
+<span id="cb10-41"><a href="#cb10-41" aria-hidden="true" tabindex="-1"></a>)</span>
+<span id="cb10-42"><a href="#cb10-42" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-43"><a href="#cb10-43" aria-hidden="true" tabindex="-1"></a>loading_range <span class="ot">&lt;-</span> <span class="fu">max</span>(</span>
+<span id="cb10-44"><a href="#cb10-44" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(loadings<span class="sc">$</span>PC1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> loadings<span class="sc">$</span>PC2<span class="sc">^</span><span class="dv">2</span>)</span>
+<span id="cb10-45"><a href="#cb10-45" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb10-46"><a href="#cb10-46" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a><span class="co"># 5. Extract PCA variable loadings</span></span>
-<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
+<span id="cb10-47"><a href="#cb10-47" aria-hidden="true" tabindex="-1"></a>arrow_scale <span class="ot">&lt;-</span> score_range <span class="sc">/</span> loading_range <span class="sc">*</span> <span class="fl">0.3</span>  </span>
+<span id="cb10-48"><a href="#cb10-48" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-49"><a href="#cb10-49" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(scores, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2)) <span class="sc">+</span></span>
 <span id="cb10-50"><a href="#cb10-50" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>loadings <span class="ot">&lt;-</span> <span class="fu">as.data.frame</span>(pca_all<span class="sc">$</span>rotation[, <span class="dv">1</span><span class="sc">:</span><span class="dv">2</span>])</span>
-<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a>loadings<span class="sc">$</span>variable <span class="ot">&lt;-</span> <span class="fu">rownames</span>(loadings)</span>
-<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a><span class="co"># 6. PCA Biplot: one point per state per facet</span></span>
-<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute automatic scaling factor for arrows</span></span>
-<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a><span class="co"># Range of PCA scores</span></span>
-<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a>score_range <span class="ot">&lt;-</span> <span class="fu">max</span>(</span>
-<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">range</span>(scores<span class="sc">$</span>PC1), </span>
-<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>  <span class="fu">range</span>(scores<span class="sc">$</span>PC2)</span>
-<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a><span class="co"># Max loading length</span></span>
-<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a>loading_range <span class="ot">&lt;-</span> <span class="fu">max</span>(</span>
-<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">sqrt</span>(loadings<span class="sc">$</span>PC1<span class="sc">^</span><span class="dv">2</span> <span class="sc">+</span> loadings<span class="sc">$</span>PC2<span class="sc">^</span><span class="dv">2</span>)</span>
-<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>)</span>
-<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a><span class="co"># Compute scale factor so arrows fit nicely inside the plot</span></span>
-<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>arrow_scale <span class="ot">&lt;-</span> score_range <span class="sc">/</span> loading_range <span class="sc">*</span> <span class="fl">0.3</span>   <span class="co"># 0.3 = ideal visual size</span></span>
-<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a><span class="co"># PCA Biplot with auto-scaled arrows</span></span>
-<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a><span class="co"># ------------------------------------</span></span>
-<span id="cb10-78"><a href="#cb10-78" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-79"><a href="#cb10-79" aria-hidden="true" tabindex="-1"></a><span class="fu">ggplot</span>(scores, <span class="fu">aes</span>(<span class="at">x =</span> PC1, <span class="at">y =</span> PC2)) <span class="sc">+</span></span>
-<span id="cb10-80"><a href="#cb10-80" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-81"><a href="#cb10-81" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Points</span></span>
-<span id="cb10-82"><a href="#cb10-82" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> color), <span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
-<span id="cb10-83"><a href="#cb10-83" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-84"><a href="#cb10-84" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Labels matching color</span></span>
-<span id="cb10-85"><a href="#cb10-85" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> State, <span class="at">color =</span> color),</span>
-<span id="cb10-86"><a href="#cb10-86" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">2.5</span>, <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.6</span>) <span class="sc">+</span></span>
-<span id="cb10-87"><a href="#cb10-87" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-88"><a href="#cb10-88" aria-hidden="true" tabindex="-1"></a>  <span class="co"># Auto-scaled PCA arrows</span></span>
-<span id="cb10-89"><a href="#cb10-89" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> loadings,</span>
-<span id="cb10-90"><a href="#cb10-90" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>,</span>
-<span id="cb10-91"><a href="#cb10-91" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> PC1 <span class="sc">*</span> arrow_scale,</span>
-<span id="cb10-92"><a href="#cb10-92" aria-hidden="true" tabindex="-1"></a>                   <span class="at">yend =</span> PC2 <span class="sc">*</span> arrow_scale),</span>
-<span id="cb10-93"><a href="#cb10-93" aria-hidden="true" tabindex="-1"></a>               <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.25</span>, <span class="st">"cm"</span>)),</span>
-<span id="cb10-94"><a href="#cb10-94" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> <span class="st">"darkblue"</span>) <span class="sc">+</span></span>
-<span id="cb10-95"><a href="#cb10-95" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-96"><a href="#cb10-96" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> loadings,</span>
-<span id="cb10-97"><a href="#cb10-97" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> PC1 <span class="sc">*</span> arrow_scale, </span>
-<span id="cb10-98"><a href="#cb10-98" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> PC2 <span class="sc">*</span> arrow_scale, </span>
-<span id="cb10-99"><a href="#cb10-99" aria-hidden="true" tabindex="-1"></a>                <span class="at">label =</span> variable),</span>
-<span id="cb10-100"><a href="#cb10-100" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="st">"darkblue"</span>, <span class="at">size =</span> <span class="dv">3</span>, <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.4</span>) <span class="sc">+</span></span>
-<span id="cb10-101"><a href="#cb10-101" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-102"><a href="#cb10-102" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_identity</span>() <span class="sc">+</span></span>
-<span id="cb10-103"><a href="#cb10-103" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> admin_party) <span class="sc">+</span></span>
-<span id="cb10-104"><a href="#cb10-104" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb10-105"><a href="#cb10-105" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb10-106"><a href="#cb10-106" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"PCA of State-Level Economic Differences"</span>,</span>
-<span id="cb10-107"><a href="#cb10-107" aria-hidden="true" tabindex="-1"></a>    <span class="at">subtitle =</span> <span class="st">"Arrows auto-scaled; Bush+Trump vs Obama+Biden averages"</span>,</span>
-<span id="cb10-108"><a href="#cb10-108" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"PC1"</span>,</span>
-<span id="cb10-109"><a href="#cb10-109" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"PC2"</span></span>
-<span id="cb10-110"><a href="#cb10-110" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> color), <span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
+<span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> State, <span class="at">color =</span> color),</span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">2.5</span>,) <span class="sc">+</span></span>
+<span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> loadings,</span>
+<span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>,</span>
+<span id="cb10-58"><a href="#cb10-58" aria-hidden="true" tabindex="-1"></a>                   <span class="at">xend =</span> PC1 <span class="sc">*</span> arrow_scale,</span>
+<span id="cb10-59"><a href="#cb10-59" aria-hidden="true" tabindex="-1"></a>                   <span class="at">yend =</span> PC2 <span class="sc">*</span> arrow_scale),</span>
+<span id="cb10-60"><a href="#cb10-60" aria-hidden="true" tabindex="-1"></a>               <span class="at">arrow =</span> <span class="fu">arrow</span>(<span class="at">length =</span> <span class="fu">unit</span>(<span class="fl">0.25</span>, <span class="st">"cm"</span>)),</span>
+<span id="cb10-61"><a href="#cb10-61" aria-hidden="true" tabindex="-1"></a>               <span class="at">color =</span> <span class="st">"black"</span>) <span class="sc">+</span></span>
+<span id="cb10-62"><a href="#cb10-62" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-63"><a href="#cb10-63" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="at">data =</span> loadings,</span>
+<span id="cb10-64"><a href="#cb10-64" aria-hidden="true" tabindex="-1"></a>            <span class="fu">aes</span>(<span class="at">x =</span> PC1 <span class="sc">*</span> arrow_scale, </span>
+<span id="cb10-65"><a href="#cb10-65" aria-hidden="true" tabindex="-1"></a>                <span class="at">y =</span> PC2 <span class="sc">*</span> arrow_scale, </span>
+<span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>                <span class="at">label =</span> variable),</span>
+<span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
+<span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_identity</span>() <span class="sc">+</span></span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> admin_party) <span class="sc">+</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"PCA of State-Level Economic Differences"</span>,</span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"PC1"</span>,</span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"PC2"</span></span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -781,6 +752,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <p>These biplots map the same PCA lines but adjust the location of the States to see specific trends across different political administrations. Under Republican administrations there are clearer clusters specifically for Republican States. States like Oklahoma, North Dakota, South Dakota, and Wyoming are very high on DPI and PI, while there is a cluster of red states lower. Additionally, very few Republican states are high on variables under Democratic administrations. Under Democratic administrations, Democratic states perform well, specifically for PCE.</p>
 <p>Looking at clusters, larger, more populated states, like California, New York, Massachusetts, are bigger outliers under Democratic administrations. Comparatively, under Republican administrates they tend to be closer with other states.</p>
 <p>Also, the cluster of Oklahoma, North Dakota, South Dakota, and Wyoming, related back to the findings on middle of the country states. They are higher on income related factors like PI and DPI under republican administrations which could indicate again those state’s benefit under Republican administration because of their geographical location.</p>
+</section>
+<section id="summary" class="level2" data-number="3.4">
+<h2 data-number="3.4" class="anchored" data-anchor-id="summary"><span class="header-section-number">3.4</span> Summary</h2>
 
 
 </section>

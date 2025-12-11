@@ -211,25 +211,27 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 
 <section id="description" class="level2" data-number="2.1">
 <h2 data-number="2.1" class="anchored" data-anchor-id="description"><span class="header-section-number">2.1</span> Description</h2>
-<p>The data for this project has been pulled from various government databases. The first dataset is from the United States Bureau of Economic Analysis and contains information on each state’s GDP, various per-capita personal income variables, and employment from 2001 to 2024 (<a href="https://www.bea.gov/data/income-saving/personal-income-by-state">Economic Factors by State</a>). The Bureau of Economic Analysis obtains most of its data from Census Bureau surveys or federal administration surveys. The United States Census obtains yearly data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
-<p>The second dataset, from the Federal Reserve Bank of St.&nbsp;Louis (FRED), contains median household income data for each state from 2001 to 2024 (<a href="https://fred.stlouisfed.org/release/tables?eid=259515&amp;rid=249">Median Income by State</a>). The dataset has 53 columns, including “Year”, all 50 states, the District of Columbia, and the United States average, and 23 rows spanning 2001 through 2024.</p>
-<p>The last dataset from the Rhode Island Department of Labor and Training contains the unemployment rate for each state from 2000 to 2024 (<a href="https://dlt.ri.gov/labor-market-information">Unemployment Rate by State</a>). The dataset has 25 columns, including “State” and the years 2000 through 2024, and 52 rows, including all fifty states, the District of Columbia, and the United States average.</p>
-<p>This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis will create features to standardize for these differences. For example, creating variables in relation to the US average in order to identify differences in relative values, not raw values. Additionally, median income and various per-capita variables are estimates and do not accurately reflect populations. So, it is important to remember this fact when exploring findings.</p>
+<p>The data for this project has been pulled from various government databases. The first data set is from the Rhode Island Department of Labor and Training, which contains the unemployment rate for each state from 2000 to 2024 (<a href="https://dlt.ri.gov/labor-market-information">Unemployment Rate by State</a>). The dataset has 25 columns, including “State” and the years 2000 through 2024, and 52 rows, including all fifty states, the District of Columbia, and the United States average. These values were obtained from the United States Census. The United States Census acquires yearly state-by-state economic data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values<a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>The second dataset, from the Federal Reserve Bank of St.&nbsp;Louis (FRED), contains median household income data for each state from 2001 to 2024 (<a href="https://fred.stlouisfed.org/release/tables?eid=259515&amp;rid=249">Median Income by State</a>). The dataset has 53 columns, including “Year”, all 50 states, the District of Columbia, and the United States average, along with 23 rows spanning 2001 through 2024. The Federal Reserve Bank of St.&nbsp;Louis aggregated these yearly values from the United States Census.</p>
+<p>The last dataset is from the United States Bureau of Economic Analysis and contains information on each state’s GDP, various per-capita personal income variables, and employment from 2001 to 2024 (<a href="https://www.bea.gov/data/income-saving/personal-income-by-state">Economic Factors by State</a>). The Bureau of Economic Analysis obtains most of its data from Census Bureau surveys or federal administration surveys. The variables of focus from this dataset are Per Capita Personal Income, Per Capita Disposable Personal Income, and Per Capita Personal Consumption Expenditures. Personal Income is the total money received, which can include salary, investments, or government payments, before taxes, in relation to a state’s population. Disposable Personal Income measures the amount of money individuals have available from their personal income after paying taxes and other mandatory fees in relation to their state’s population. Personal Consumption Expenditures measures an individual’s spending on goods and services in relation to their state’s population.</p>
+<p>Additional variables from the United States Bureau of Economic Analysis were not included in the exploratory data analysis due to limitations in handling missing values and in quantitative comparisons. For example, while GDP measures a state’s economic output, smaller states will inherently have lower GDP, making comparisons free of confounding variables difficult.</p>
+<p>This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis will create features to standardize for these differences. For example, creating variables in relation to the US average in order to identify differences in relative values, not raw values. Additionally, both median income and per-capita variables are derived from survey-based estimates and may therefore not perfectly reflect the true behavior of each population.</p>
 </section>
 <section id="missing-value-analysis" class="level2" data-number="2.2">
 <h2 data-number="2.2" class="anchored" data-anchor-id="missing-value-analysis"><span class="header-section-number">2.2</span> Missing value analysis</h2>
-<p>The only dataset with missing values is the United States Bureau of Economic Analysis which contains data across states and years on various economic factors. Since the unemployement rate and median income data sets do not contain and missing values, they will not be explored in this section for simplicity.</p>
+<p>The only dataset with missing values is the United States Bureau of Economic Analysis which contains data across states and years on various economic factors. Since the unemployment rate and median income data sets do not contain and missing values, they will not be explored in this section for simplicity.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb1"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(readr)</span>
 <span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(redav)</span>
 <span id="cb1-3"><a href="#cb1-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
-<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a>various_factors <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"/Users/avagrey/political-party-impact/data/clean_preprocessed/various_factors_clean.csv"</span>)</span>
-<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a>various_factors <span class="sc">|&gt;</span></span>
-<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(State <span class="sc">==</span> <span class="st">"Alabama"</span>) <span class="sc">|&gt;</span></span>
-<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_missing</span>(<span class="at">percent =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb1-4"><a href="#cb1-4" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyverse)</span>
+<span id="cb1-5"><a href="#cb1-5" aria-hidden="true" tabindex="-1"></a>various_factors <span class="ot">&lt;-</span> <span class="fu">read_csv</span>(<span class="st">"/Users/avagrey/political-party-impact/data/clean_preprocessed/various_factors_clean_NA.csv"</span>)</span>
+<span id="cb1-6"><a href="#cb1-6" aria-hidden="true" tabindex="-1"></a></span>
+<span id="cb1-7"><a href="#cb1-7" aria-hidden="true" tabindex="-1"></a>various_factors <span class="sc">|&gt;</span></span>
+<span id="cb1-8"><a href="#cb1-8" aria-hidden="true" tabindex="-1"></a>  <span class="fu">filter</span>(State <span class="sc">==</span> <span class="st">"Alabama"</span>) <span class="sc">|&gt;</span></span>
+<span id="cb1-9"><a href="#cb1-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">plot_missing</span>(<span class="at">percent =</span> <span class="cn">FALSE</span>)</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -239,42 +241,43 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Since the data set is large, the plot above is only looking at missing patterns for the state of Alabama. However, as the plot states, every safe state follows this pattern. Either the row has every variable, or, it is missing Real Personal Income, Real Personal Consumption Expenditures, Real Per Capita Personal Income, and Real Per Capita Personal Consumption Expenditures. From these patterns it is clear that certain years Personal Income and Personal Consumption Expenditures were not recorded at the raw level and the per capita level.</p>
-<p>Since the data can also be formatted by year rather than state, there could also be insight into specific years missing data.</p>
+<p>Since the data set is large, the plot above shows only the missing patterns for the state of Alabama. However, as the plot states, every safe state follows this pattern. Either the row includes all variables, or it is missing Real Personal Income, Real Personal Consumption Expenditures, Real Per Capita Personal Income, and Real Per Capita Personal Consumption Expenditures. From these patterns, it is clear that in certain years, Personal Income and Personal Consumption Expenditures were not recorded at the raw or per capita levels.</p>
+<p>Since the data can be formatted by year rather than state, this could yield insights into specific years with missing data.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
 <div class="code-copy-outer-scaffold"><div class="sourceCode cell-code" id="cb2"><pre class="sourceCode r code-with-copy"><code class="sourceCode r"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(ggplot2)</span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(tidyr)</span>
-<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>various_factors <span class="sc">|&gt;</span></span>
-<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
-<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(State, Year),</span>
-<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
-<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
-<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span></span>
-<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Year, variable) <span class="sc">|&gt;</span></span>
-<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
-<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_missing =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(value)) <span class="sc">*</span> <span class="dv">100</span>,</span>
-<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
-<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span> </span>
-<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> variable, <span class="at">fill =</span> pct_missing)) <span class="sc">+</span></span>
-<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span></span>
-<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(</span>
-<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">"white"</span>,</span>
-<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">high =</span> <span class="st">"purple"</span>,</span>
-<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"% Missing"</span></span>
-<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Missing Data Percentage Across States by Year and Variable"</span>,</span>
-<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
-<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Variable"</span></span>
-<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
-<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
-<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
-<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid =</span> <span class="fu">element_blank</span>()</span>
-<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
-<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">2001</span>, <span class="dv">2012</span>, <span class="dv">2024</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a><span class="fu">library</span>(dplyr)</span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a>various_factors <span class="sc">|&gt;</span></span>
+<span id="cb2-5"><a href="#cb2-5" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
+<span id="cb2-6"><a href="#cb2-6" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="sc">-</span><span class="fu">c</span>(State, Year),</span>
+<span id="cb2-7"><a href="#cb2-7" aria-hidden="true" tabindex="-1"></a>    <span class="at">names_to =</span> <span class="st">"variable"</span>,</span>
+<span id="cb2-8"><a href="#cb2-8" aria-hidden="true" tabindex="-1"></a>    <span class="at">values_to =</span> <span class="st">"value"</span></span>
+<span id="cb2-9"><a href="#cb2-9" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span></span>
+<span id="cb2-10"><a href="#cb2-10" aria-hidden="true" tabindex="-1"></a>  <span class="fu">group_by</span>(Year, variable) <span class="sc">|&gt;</span></span>
+<span id="cb2-11"><a href="#cb2-11" aria-hidden="true" tabindex="-1"></a>  <span class="fu">summarize</span>(</span>
+<span id="cb2-12"><a href="#cb2-12" aria-hidden="true" tabindex="-1"></a>    <span class="at">pct_missing =</span> <span class="fu">mean</span>(<span class="fu">is.na</span>(value)) <span class="sc">*</span> <span class="dv">100</span>,</span>
+<span id="cb2-13"><a href="#cb2-13" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
+<span id="cb2-14"><a href="#cb2-14" aria-hidden="true" tabindex="-1"></a>  )<span class="sc">|&gt;</span> </span>
+<span id="cb2-15"><a href="#cb2-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">ggplot</span>(<span class="fu">aes</span>(<span class="at">x =</span> Year, <span class="at">y =</span> variable, <span class="at">fill =</span> pct_missing)) <span class="sc">+</span></span>
+<span id="cb2-16"><a href="#cb2-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"gray"</span>) <span class="sc">+</span></span>
+<span id="cb2-17"><a href="#cb2-17" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient</span>(</span>
+<span id="cb2-18"><a href="#cb2-18" aria-hidden="true" tabindex="-1"></a>    <span class="at">low =</span> <span class="st">"white"</span>,</span>
+<span id="cb2-19"><a href="#cb2-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">high =</span> <span class="st">"purple"</span>,</span>
+<span id="cb2-20"><a href="#cb2-20" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"% Missing"</span></span>
+<span id="cb2-21"><a href="#cb2-21" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-22"><a href="#cb2-22" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb2-23"><a href="#cb2-23" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"Missing Data Percentage Across States by Year and Variable"</span>,</span>
+<span id="cb2-24"><a href="#cb2-24" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"Year"</span>,</span>
+<span id="cb2-25"><a href="#cb2-25" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"Variable"</span></span>
+<span id="cb2-26"><a href="#cb2-26" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-27"><a href="#cb2-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>()<span class="sc">+</span></span>
+<span id="cb2-28"><a href="#cb2-28" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme</span>(</span>
+<span id="cb2-29"><a href="#cb2-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">axis.text.x =</span> <span class="fu">element_text</span>(<span class="at">angle =</span> <span class="dv">45</span>, <span class="at">hjust =</span> <span class="dv">1</span>),</span>
+<span id="cb2-30"><a href="#cb2-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">panel.grid =</span> <span class="fu">element_blank</span>()</span>
+<span id="cb2-31"><a href="#cb2-31" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
+<span id="cb2-32"><a href="#cb2-32" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_x_continuous</span>(<span class="at">breaks =</span> <span class="fu">c</span>(<span class="dv">2001</span>, <span class="dv">2012</span>, <span class="dv">2024</span>))</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -284,8 +287,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>This plot aims to identify which years are missing the four variables and how often they are (in relation to the states). However, it is clear from this plot that for every state the same eight years are missing the same four variables. It seems that data for the missing variables were not recorded at the beginning of the 21st century. Also, potentially at the time the data was pulled, 2024 had not been recorded.</p>
-<p>Since every state is missing data for Real Personal Income, Real Per Capita Personal Income, Real Per Capita Personal Consumption Expenditures, and Real Personal Consumption Expenditures through the years 2001-2007 and 2024, the analysis will focus on the available data an adjust for inflation impact with feature engineering relative metrics.</p>
+<p>This plot summarizes the percentage of missing values for each variable in each year, averaged across all states. It is clear from this plot that for every state, the same eight years are missing the same four variables. The only two percentages visualized are 100% and 0%. It seems that data for the missing variables were not recorded at the beginning of the 21st century. Also, potentially, the data was pulled before 2024 was recorded.</p>
 
 
 </section>

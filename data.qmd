@@ -2,37 +2,41 @@
 
 ## Description
 
-The data for this project has been pulled from various government databases. The first dataset is from the United States Bureau of Economic Analysis and contains information on each state's GDP, various per-capita personal income variables, and employment from 2001 to 2024 ([Economic Factors by State](https://www.bea.gov/data/income-saving/personal-income-by-state)). The Bureau of Economic Analysis obtains most of its data from Census Bureau surveys or federal administration surveys. The United States Census obtains yearly data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values^[See U.S. Census Bureau, "How the Data Are Collected," n.d., https://www.census.gov/programs-surveys/gov-finances/technical-documentation/methodology/how-the-data-are-collected.html.]. 
+The data for this project has been pulled from various government databases. The first data set is from the Rhode Island Department of Labor and Training, which contains the unemployment rate for each state from 2000 to 2024 ([Unemployment Rate by State](https://dlt.ri.gov/labor-market-information)). The dataset has 25 columns, including “State” and the years 2000 through 2024, and 52 rows, including all fifty states, the District of Columbia, and the United States average. These values were obtained from the United States Census. The United States Census acquires yearly state-by-state economic data through randomized surveys of thousands of American households and, with those results and government records, estimates population-sized values^[See U.S. Census Bureau, “How the Data Are Collected,” n.d., https://www.census.gov/programs-surveys/gov-finances/technical-documentation/methodology/how-the-data-are-collected.html.].
 
-The second dataset, from the Federal Reserve Bank of St. Louis (FRED), contains median household income data for each state from 2001 to 2024 ([Median Income by State](https://fred.stlouisfed.org/release/tables?eid=259515&rid=249)). The dataset has 53 columns, including "Year", all 50 states, the District of Columbia, and the United States average, and 23 rows spanning 2001 through 2024. 
+The second dataset, from the Federal Reserve Bank of St. Louis (FRED), contains median household income data for each state from 2001 to 2024 ([Median Income by State](https://fred.stlouisfed.org/release/tables?eid=259515&rid=249)). The dataset has 53 columns, including “Year”, all 50 states, the District of Columbia, and the United States average, along with 23 rows spanning 2001 through 2024. The Federal Reserve Bank of St. Louis aggregated these yearly values from the United States Census.
 
-The last dataset from the Rhode Island Department of Labor and Training contains the unemployment rate for each state from 2000 to 2024 ([Unemployment Rate by State](https://dlt.ri.gov/labor-market-information)). The dataset has 25 columns, including "State" and the years 2000 through 2024, and 52 rows, including all fifty states, the District of Columbia, and the United States average.  
+The last dataset is from the United States Bureau of Economic Analysis and contains information on each state’s GDP, various per-capita personal income variables, and employment from 2001 to 2024 ([Economic Factors by State](https://www.bea.gov/data/income-saving/personal-income-by-state)). The Bureau of Economic Analysis obtains most of its data from Census Bureau surveys or federal administration surveys. The variables of focus from this dataset are Per Capita Personal Income, Per Capita Disposable Personal Income, and Per Capita Personal Consumption Expenditures. Personal Income is the total money received, which can include salary, investments, or government payments, before taxes, in relation to a state’s population. Disposable Personal Income measures the amount of money individuals have available from their personal income after paying taxes and other mandatory fees in relation to their state’s population. Personal Consumption Expenditures measures an individual's spending on goods and services in relation to their state’s population.
 
+Additional variables from the United States Bureau of Economic Analysis were not included in the exploratory data analysis due to limitations in handling missing values and in quantitative comparisons. For example, while GDP measures a state's economic output, smaller states will inherently have lower GDP, making comparisons free of confounding variables difficult.
 
-This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis will create features to standardize for these differences. For example, creating variables in relation to the US average in order to identify differences in relative values, not raw values. Additionally, median income and various per-capita variables are estimates and do not accurately reflect populations. So, it is important to remember this fact when exploring findings. 
+This paragraph will describe some potential limitations and issues with the data. First, some of the data sources are not corrected for inflation. This means that monetary values between years are not completely comparable. To avoid misleading results, the analysis will create features to standardize for these differences. For example, creating variables in relation to the US average in order to identify differences in relative values, not raw values. Additionally, both median income and per-capita variables are derived from survey-based estimates and may therefore not perfectly reflect the true behavior of each population.
 
 ## Missing value analysis
 
-The only dataset with missing values is the United States Bureau of Economic Analysis which contains data across states and years on various economic factors. Since the unemployement rate and median income data sets do not contain and missing values, they will not be explored in this section for simplicity. 
+The only dataset with missing values is the United States Bureau of Economic Analysis which contains data across states and years on various economic factors. Since the unemployment rate and median income data sets do not contain and missing values, they will not be explored in this section for simplicity. 
 
 ```{r}
 #| fig-width: 13
 library(readr)
 library(redav)
 library(dplyr)
-various_factors <- read_csv("/Users/avagrey/political-party-impact/data/clean_preprocessed/various_factors_clean.csv")
+library(tidyverse)
+various_factors <- read_csv("/Users/avagrey/political-party-impact/data/clean_preprocessed/various_factors_clean_NA.csv")
 
 various_factors |>
   filter(State == "Alabama") |>
   plot_missing(percent = FALSE)
 ```
-Since the data set is large, the plot above is only looking at missing patterns for the state of Alabama. However, as the plot states, every safe state follows this pattern. Either the row has every variable, or, it is missing Real Personal Income, Real Personal Consumption Expenditures, Real Per Capita Personal Income, and Real Per Capita Personal Consumption Expenditures. From these patterns it is clear that certain years Personal Income and Personal Consumption Expenditures were not recorded at the raw level and the per capita level. 
 
-Since the data can also be formatted by year rather than state, there could also be insight into specific years missing data.
+Since the data set is large, the plot above shows only the missing patterns for the state of Alabama. However, as the plot states, every safe state follows this pattern. Either the row includes all variables, or it is missing Real Personal Income, Real Personal Consumption Expenditures, Real Per Capita Personal Income, and Real Per Capita Personal Consumption Expenditures. From these patterns, it is clear that in certain years, Personal Income and Personal Consumption Expenditures were not recorded at the raw or per capita levels. 
+
+Since the data can be formatted by year rather than state, this could yield insights into specific years with missing data.
 
 ```{r}
 library(ggplot2)
 library(tidyr)
+library(dplyr)
 various_factors |>
   pivot_longer(
     cols = -c(State, Year),
@@ -64,6 +68,5 @@ various_factors |>
   scale_x_continuous(breaks = c(2001, 2012, 2024))
 ```
 
-This plot aims to identify which years are missing the four variables and how often they are (in relation to the states). However, it is clear from this plot that for every state the same eight years are missing the same four variables. It seems that data for the missing variables were not recorded at the beginning of the 21st century. Also, potentially at the time the data was pulled, 2024 had not been recorded. 
+This plot summarizes the percentage of missing values for each variable in each year, averaged across all states. It is clear from this plot that for every state, the same eight years are missing the same four variables. The only two percentages visualized are 100% and 0%. It seems that data for the missing variables were not recorded at the beginning of the 21st century. Also, potentially, the data was pulled before 2024 was recorded. 
 
-Since every state is missing data for Real Personal Income, Real Per Capita Personal Income, Real Per Capita Personal Consumption Expenditures, and Real Personal Consumption Expenditures through the years 2001-2007 and 2024, the analysis will focus on the available data an adjust for inflation impact with feature engineering relative metrics. 

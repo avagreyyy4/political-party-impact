@@ -4,9 +4,9 @@ This section summarizes key findings from each dataset, identifying trends acros
 
 ## Unemployement Rate
 
-The first variable of interest is Unemployment Rate. To understand presidential impact, the variable change was created. Change is defined as the unemployment rate of the state the last year the respective president was in office subtracted from the first year they took office. Naturally, certain states have lower unemployment rates for reasons related to population size, specific industries, or age of workforce. To account for these difference, the analysis uses a metric that aims to quantitative the state's change in relation to the overall United State's change. So, each state has a value "Difference from US," which is the change in the individuals state's unemployment rate for the respective administration subtracted by the United State's change in unemployment rate for the same administration. 
+The first variable of interest is the Unemployment Rate. To quantify the impact of each presidency, a variable ‘change’ was created. Change is defined as the state's unemployment rate in the last year the respective president was in office, subtracted from the first year they took office. Naturally, certain states have lower unemployment rates for reasons related to population size, specific industries, or the age of the workforce. To account for these differences, the analysis uses a metric that quantifies the state's change relative to the overall change in the United States. So, each state has a value "Difference from US," which is the change in the individual state's unemployment rate for the respective administration, subtracted by the United States' change in unemployment rate for the same administration. 
 
-First, these values were plotted with a Cleveland Dot plot to see if there are overall trends with unemployment rate. Recall, a lower unemployment rate is better, so a lower difference from US is better as well. 
+First, "Difference from US" was plotted with a Cleveland Dot plot to see if there are overall trends with unemployment rate by state and administration. Recall, a lower unemployment rate is better, so a lower difference from US is better as well. 
 
 ```{r}
 #| fig-height: 10
@@ -34,7 +34,7 @@ unemployement_us_avg |> ggplot(aes(x = dif_from_us, y = State_in_panel, color = 
     )) + scale_y_reordered() + labs(y = "State", x = "Average Unemployement Rate",
                                     title = "Difference from US Change in Unemployement Rate Throughout 21st Century Across Administrations")
 ```
-Under Obama, Trump, and Biden there are clear differences with safe red and safe blue state outcomes under the opposite party. Under Democratic presidents (Obama and Biden), Republican states experience smaller or no improvement in unemployment rate compared to the US average. In fact, it seems that most of the top half of the states that perform worse than the US average are Republican states. Similarly, under Trump, the state's that perform the worst compared to the US average are all Democratic states. Additionally, under Obama, Trump, and Biden, safe state's seem to see a larger decrease in unemployment rate compared to the US average under their respective administration. While Bush does not have an as strong pattern, the majority of states that see a greater reduction in unemployment rate compared to the US average are Republican states. 
+Under Obama, Trump, and Biden, there are clear differences in safe red and safe blue state outcomes under the opposite party. Under Democratic presidents (Obama and Biden), Republican states experience smaller or no improvement in the unemployment rate compared to the US average. In fact, most of the top half of states that perform worse than the US average are Republican-voting. Similarly, under Trump, the states that perform worse compared to the US average are all Democratic-voting. Additionally, under Obama, Trump, and Biden, safe states seem to experience a larger decrease in the unemployment rate than the US average during their respective administrations, with many red dots at the bottom of Trump's graph and many blue dots at the bottom of Obama's and Biden's. While Bush does not have as strong of a pattern, the majority of states that see a greater reduction in the unemployment rate than the US average are Republican states.
 
 
 It is also helpful to understand this patterns more generally rather than at a state and administration level.
@@ -58,7 +58,9 @@ vcd::mosaic(Change ~ Vote + Administration, mosaic2, direction = c("v", "v", "h"
 
 ```
 
-This mosaic plot looks at the frequency of states that perform better or worse compared to the US average. Interestingly, while the Cleveland Dot plot showed that the political party the safe state voted for impacted their unemployment rate change, the mosaic plot communicates a slightly different pattern. The plot above shows that Republican states greater experience impact on their unemployment rate depending on the administration's party while Democratic states' do not. Under Republican presidents, Republican state's unemployment rate mostly go down compared to the US average while under Democratic presidents it tends to go up. Comparatively, Democratic States experience little-to-no difference in their unemployment rate compared to the US average regardless of the administration's party. 
+This mosaic plot shows the frequency of states whose unemployment rate changes increase or decrease relative to the US, grouped by the administration's party and the state's voting preference.  Interestingly, while the Cleveland Dot plot showed that the political party the safe state voted for affected its unemployment rate change, the mosaic plot shows a slightly different pattern. 
+
+The plot above shows that unemployment in Republican states fluctuates depending on the political party of the administration, while unemployment in Democratic states remains stable. Under Republican presidents, Republican states' unemployment rates mostly go down compared to the US average, while under Democratic presidents, they tend to go up. This indicates a strong relationship between the administration's party and the unemployment rate in Republican states. Compared with the US average, Democratic States experience little to no difference in their unemployment rates, regardless of the administration's party. 
 
 
 It may be helpful to geographically plot unemployment rate change from US average to see if there are geographical patterns.
@@ -107,14 +109,14 @@ four_maps <- four_maps +
 four_maps
 ```
 
-It is clear that the middle of the country has strong changes across administrations. Specifically, states like Wyoming, Nebraska, Utah, South and North Dakota, and Kansas have strong differences. Under Republican administrations these state's perform better and under Democratic administrations they perform worse. While this makes sense because they are Republican safe states, it is also interesting that the degree they perform differently. The darkest part of the country for each administration (regardless of direction), is the middle of the country. 
+The plot above communicates that states in the middle of the country have a greater change in unemployment rate difference across administrations. Specifically, states like Wyoming, Nebraska, Utah, South Dakota, North Dakota, and Kansas have clear positive and negative differences. Under Republican administrations, these states perform better, and under Democratic administrations, they perform worse. While this makes sense because they are Republican-safe states, it is also interesting that they seem to fluctuate more than other safe red states, turning dark green during Republican administrations and dark purple during Democratic administrations. 
 
 
-This pattern is clearly seen with a head map by standard deviation of Unemployment rate change compared to the United States Average. 
+A heat map showing the standard deviation of unemployment-rate changes relative to the U.S. average further supports this pattern.
 
 ```{r}
 state_order <- unemployement_us_avg |>
-  group_by(State) %>%
+  group_by(State) |>
   summarise(var_gap = sd(dif_from_us, na.rm = TRUE), .groups = "drop") %>%
   arrange(var_gap) |>
   pull(State)
@@ -144,7 +146,7 @@ difference_visual <- ggplot(
 difference_visual
 ```
 
-This heat map reinforces the same idea as the geographical plots, many states in the middle of the country, like Wyoming, Nebraska, South Dakota, North Dakota, and Utah, see the largest unemployment differences across administration. Besides an outlier like Hawaii, the majority of the top states are Republican (affirms the mosaic plot) and located in the middle of the country. Comparatively, many East Coast and coastal states, like Delaware, Massachusetts, Oregon, Vermont, and New Jersey, experience very little change in their unemployment rate regardless of the political party in office. 
+This heat map reinforces the same idea as the geographical plots; many states in the middle of the country, like Wyoming, Nebraska, South Dakota, North Dakota, and Utah, show the largest unemployment differences across administrations. Besides an outlier like Hawaii, the majority of the top states are Republican (as shown in the mosaic plot) and are located in the middle of the country. Comparatively, many East Coast and coastal states, such as Delaware, Massachusetts, Oregon, Vermont, and New Jersey, have unemployment rates that change very little regardless of the political party in office. 
 
 
 ## Median Income
@@ -245,7 +247,7 @@ median_income|>
     x = "Year",
     y = "Average Median Income",
     title = "Average Median Income by State Party")+
-    theme_minimal(base_size = 14) 
+    theme_minimal() 
 ```
 
 
@@ -295,7 +297,7 @@ slope_plot2 <- median_income |>
     x = "Year",
     y = "Indexed Median Income",
     title = "Relative Growth in Median Income by State Party Group"
-  )
+  ) +   theme_minimal()
 
 slope_plot2
 ```
@@ -319,12 +321,15 @@ df_ridge <- various_factors |>
     dif_PC_DPI_US = mean(PC_DPI_dif, na.rm = TRUE),
     dif_PC_PCE_US = mean(PC_PCE_dif, na.rm = TRUE),
     .groups = "drop"
-  ) |>
+  ) |>  
+  rename("Personal Income" = 'dif_PC_PI_US',
+         "Disposable Income" = 'dif_PC_DPI_US',
+         "Personal Consumption Expenditures" = 'dif_PC_PCE_US') |>
   pivot_longer(
-    cols = starts_with("dif_"),
+    cols = `Personal Income`:`Personal Consumption Expenditures`,
     names_to = "variable",
     values_to = "value"
-  )
+  ) 
 
 ggplot(df_ridge, 
        aes(x = value, 
@@ -401,11 +406,6 @@ Additionally, it is interesting how the District of Columbia and Wyoming are con
 library(dplyr)
 library(ggplot2)
 
-# ------------------------------------
-# 1. Collapse administrations into two groups
-#    and average differences per state
-# ------------------------------------
-
 admin_groups <- various_factors |>
   mutate(
     admin_party = case_when(
@@ -421,22 +421,13 @@ admin_groups <- various_factors |>
     .groups = "drop"
   )
 
-# ------------------------------------
-# 2. Standardize values for PCA
-# ------------------------------------
 
 admin_groups_scaled <- admin_groups |>
   mutate(across(starts_with("PC_"), ~ scale(.x)[,1]))
 
-# ------------------------------------
-# 3. Run PCA ONCE on the averaged data
-# ------------------------------------
 
 pca_all <- prcomp(admin_groups_scaled[, 4:6], scale. = TRUE)
 
-# ------------------------------------
-# 4. Extract PCA scores for plotting
-# ------------------------------------
 
 scores <- as.data.frame(pca_all$x)
 scores$State       <- admin_groups_scaled$State
@@ -444,67 +435,47 @@ scores$vote        <- admin_groups_scaled$vote
 scores$admin_party <- admin_groups_scaled$admin_party
 scores$color       <- ifelse(scores$vote == "Democrat", "blue", "red")
 
-# ------------------------------------
-# 5. Extract PCA variable loadings
-# ------------------------------------
 
 loadings <- as.data.frame(pca_all$rotation[, 1:2])
 loadings$variable <- rownames(loadings)
 
-# ------------------------------------
-# 6. PCA Biplot: one point per state per facet
-# ------------------------------------
-# ------------------------------------
-# Compute automatic scaling factor for arrows
-# ------------------------------------
 
-# Range of PCA scores
 score_range <- max(
   range(scores$PC1), 
   range(scores$PC2)
 )
 
-# Max loading length
 loading_range <- max(
   sqrt(loadings$PC1^2 + loadings$PC2^2)
 )
 
-# Compute scale factor so arrows fit nicely inside the plot
-arrow_scale <- score_range / loading_range * 0.3   # 0.3 = ideal visual size
-
-# ------------------------------------
-# PCA Biplot with auto-scaled arrows
-# ------------------------------------
+arrow_scale <- score_range / loading_range * 0.3  
 
 ggplot(scores, aes(x = PC1, y = PC2)) +
 
-  # Points
   geom_point(aes(color = color), size = 3, alpha = 0.8) +
 
-  # Labels matching color
   geom_text(aes(label = State, color = color),
-            size = 2.5, vjust = -0.6) +
+            size = 2.5,) +
 
-  # Auto-scaled PCA arrows
   geom_segment(data = loadings,
                aes(x = 0, y = 0,
                    xend = PC1 * arrow_scale,
                    yend = PC2 * arrow_scale),
                arrow = arrow(length = unit(0.25, "cm")),
-               color = "darkblue") +
+               color = "black") +
 
   geom_text(data = loadings,
             aes(x = PC1 * arrow_scale, 
                 y = PC2 * arrow_scale, 
                 label = variable),
-            color = "darkblue", size = 3, vjust = -0.4) +
+            color = "black", size = 3) +
 
   scale_color_identity() +
   facet_wrap(~ admin_party) +
   theme_minimal() +
   labs(
     title = "PCA of State-Level Economic Differences",
-    subtitle = "Arrows auto-scaled; Bush+Trump vs Obama+Biden averages",
     x = "PC1",
     y = "PC2"
   )
@@ -517,3 +488,7 @@ These biplots map the same PCA lines but adjust the location of the States to se
 Looking at clusters, larger, more populated states, like California, New York, Massachusetts, are bigger outliers under Democratic administrations. Comparatively, under Republican administrates they tend to be closer with other states. 
 
 Also, the cluster of Oklahoma, North Dakota, South Dakota, and Wyoming, related back to the findings on middle of the country states. They are higher on income related factors like PI and DPI under republican administrations which could indicate again those state's benefit under Republican administration because of their geographical location. 
+
+
+## Summary
+

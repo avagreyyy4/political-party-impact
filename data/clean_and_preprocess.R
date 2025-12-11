@@ -203,7 +203,7 @@ various_factors_clean1 <- various_factors_clean |>
     RPP         = `Regional price parities (RPPs) 9`,
     IRPD        = `Implicit regional price deflator 10`,
     `Employ.`        = `Total employment (number of jobs)`
-  )
+  ) |> select (-RPP, -IRPD, -GeoFips)
 
 various_factors_clean2 <- various_factors_clean1 |>
   filter(State %in% all_consistent | State == "United States") |>
