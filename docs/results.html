@@ -211,10 +211,10 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </header>
 
 
-<p>This section summarizes key findings from each dataset, identifying trends across economic factors and safe states.</p>
+<p>This section summarizes key findings from each dataset, identifying trends across economic variables and safe states. The analysis focuses on each variable individually to identify patterns within and across economic factors.</p>
 <section id="unemployement-rate" class="level2" data-number="3.1">
 <h2 data-number="3.1" class="anchored" data-anchor-id="unemployement-rate"><span class="header-section-number">3.1</span> Unemployement Rate</h2>
-<p>The first variable of interest is the Unemployment Rate. To quantify the impact of each presidency, a variable ‘change’ was created. Change is defined as the state’s unemployment rate in the last year the respective president was in office, subtracted from the first year they took office. Naturally, certain states have lower unemployment rates for reasons related to population size, specific industries, or the age of the workforce. To account for these differences, the analysis uses a metric that quantifies the state’s change relative to the overall change in the United States. So, each state has a value “Difference from US,” which is the change in the individual state’s unemployment rate for the respective administration, subtracted by the United States’ change in unemployment rate for the same administration.</p>
+<p>The first variable of interest is the Unemployment Rate. To quantify the impact of each presidency, a variable ‘change’ was created. Change is defined as the state’s unemployment rate in the last year the respective president was in office, subtracted from the first year they took office. Naturally, certain states have lower unemployment rates for reasons related to population size, specific industries, or the age of the workforce. To account for these differences, the analysis uses a metric that quantifies the state’s change relative to the overall change in the United States. Each state has a value “Difference from US,” (often referred to as relative unemployment rate change) which is the change in the individual state’s unemployment rate for the respective administration, subtracted by the United States’ change in unemployment rate for the same administration.</p>
 <p>First, “Difference from US” was plotted with a Cleveland Dot plot to see if there are overall trends with unemployment rate by state and administration. Recall, a lower unemployment rate is better, so a lower difference from US is better as well.</p>
 <div class="cell">
 <details class="code-fold">
@@ -250,7 +250,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Under Obama, Trump, and Biden, there are clear differences in safe red and safe blue state outcomes under the opposite party. Under Democratic presidents (Obama and Biden), Republican states experience smaller or no improvement in the unemployment rate compared to the US average. In fact, most of the top half of states that perform worse than the US average are Republican-voting. Similarly, under Trump, the states that perform worse compared to the US average are all Democratic-voting. Additionally, under Obama, Trump, and Biden, safe states seem to experience a larger decrease in the unemployment rate than the US average during their respective administrations, with many red dots at the bottom of Trump’s graph and many blue dots at the bottom of Obama’s and Biden’s. While Bush does not have as strong of a pattern, the majority of states that see a greater reduction in the unemployment rate than the US average are Republican states.</p>
+<p>Under Obama, Trump, and Biden, there are clear differences in safe red and safe blue state outcomes, depending on the administration and its party. Under Democratic presidents (Obama and Biden), Republican states experience less improvement or an increase in the unemployment rate compared to the US average. In fact, under Democratic administrations, most of the states that perform worse than the US average are Republican-voting states. Similarly, under Trump, the states that perform worse compared to the US average are all Democratic-voting states, many blue dots at the top of Trump’s graph. Additionally, under Obama, Trump, and Biden, safe states seem to experience a larger decrease in the unemployment rate than the US average during their respective administrations, with many red dots at the bottom of Trump’s graph and many blue dots at the bottom of Obama’s and Biden’s. While Bush does not have as strong a pattern, the majority of states that see a greater reduction in the unemployment rate than the US average are Republican states, majority of dots on the bottom half are red.</p>
+<p>Also, notably, the ordering of states changes considerably across administrations, even across administrations of the same party. For example, under Trump Hawaii and Massachusetts had the worst relative unemployment rate change, but under Bush Hawaii had the 6th best relative unemployment rate change and Massachusetts was below the top five worst states. So, while there are party specific trends for the ranking of relative unemployment rate, there does not seem to be state specific trends.</p>
 <p>It is also helpful to understand this patterns more generally rather than at a state and administration level.</p>
 <div class="cell">
 <details class="code-fold">
@@ -280,9 +281,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>This mosaic plot shows the frequency of states whose unemployment rate changes increase or decrease relative to the US, grouped by the administration’s party and the state’s voting preference. Interestingly, while the Cleveland Dot plot showed that the political party the safe state voted for affected its unemployment rate change, the mosaic plot shows a slightly different pattern.</p>
-<p>The plot above shows that unemployment in Republican states fluctuates depending on the political party of the administration, while unemployment in Democratic states remains stable. Under Republican presidents, Republican states’ unemployment rates mostly go down compared to the US average, while under Democratic presidents, they tend to go up. This indicates a strong relationship between the administration’s party and the unemployment rate in Republican states. Compared with the US average, Democratic States experience little to no difference in their unemployment rates, regardless of the administration’s party.</p>
-<p>It may be helpful to geographically plot unemployment rate change from US average to see if there are geographical patterns.</p>
+<p>This mosaic plot shows the frequency of states whose unemployment rate changes increase or decrease relative to the US, grouped by the administration’s party and the state’s voting preference. Interestingly, while the Cleveland Dot plot showed that the political party the safe state voted for affected its relative unemployment rate change, the mosaic plot shows a slightly different pattern.</p>
+<p>The plot above shows that unemployment in Republican states fluctuates depending on the political party of the administration, while unemployment in Democratic states remains stable. Under Republican presidents, Republican states’ unemployment rates mostly decrease compared to the US average, while under Democratic presidents, they tend to increase This indicates a strong relationship between the administration’s party and the unemployment rate in Republican states. Comparatively, Democratic States experience little to no difference in their unemployment rates, regardless of the administration’s party.</p>
+<p>It may be useful to plot unemployment rate changes relative to the U.S. average on a map to identify potential geographic patterns</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -336,7 +337,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>The plot above communicates that states in the middle of the country have a greater change in unemployment rate difference across administrations. Specifically, states like Wyoming, Nebraska, Utah, South Dakota, North Dakota, and Kansas have clear positive and negative differences. Under Republican administrations, these states perform better, and under Democratic administrations, they perform worse. While this makes sense because they are Republican-safe states, it is also interesting that they seem to fluctuate more than other safe red states, turning dark green during Republican administrations and dark purple during Democratic administrations.</p>
+<p>The plot above communicates that states in the middle of the country have a greater change in relative unemployment rate change across administrations. Specifically, states like Wyoming, Nebraska, Utah, South Dakota, North Dakota, and Kansas have clear positive and negative differences. Under Republican administrations, these states perform better, and under Democratic administrations, they perform worse. While this makes sense because they are Republican-safe states, it is also interesting that they seem to fluctuate more than other safe red states, turning dark green during Republican administrations and dark purple during Democratic administrations.</p>
 <p>A heat map showing the standard deviation of unemployment-rate changes relative to the U.S. average further supports this pattern.</p>
 <div class="cell">
 <details class="code-fold">
@@ -356,7 +357,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a>      <span class="at">fill =</span> dif_from_us)</span>
 <span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a>) <span class="sc">+</span></span>
 <span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_tile</span>(<span class="at">color =</span> <span class="st">"white"</span>) <span class="sc">+</span></span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"State − U.S. unemployment gap by administration"</span>,</span>
+<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(<span class="at">title =</span> <span class="st">"Relative State Unemployment Change by Administration"</span>,</span>
 <span id="cb4-17"><a href="#cb4-17" aria-hidden="true" tabindex="-1"></a>       <span class="at">x =</span> <span class="cn">NULL</span>, <span class="at">y =</span> <span class="cn">NULL</span>) <span class="sc">+</span></span>
 <span id="cb4-18"><a href="#cb4-18" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_fill_gradient2</span>(</span>
 <span id="cb4-19"><a href="#cb4-19" aria-hidden="true" tabindex="-1"></a>    <span class="at">name =</span> <span class="st">"State − US change"</span>,</span>
@@ -383,7 +384,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </section>
 <section id="median-income" class="level2" data-number="3.2">
 <h2 data-number="3.2" class="anchored" data-anchor-id="median-income"><span class="header-section-number">3.2</span> Median Income</h2>
-<p>The next variable is Median Household Income. First, it is important to understand median income for state’s in each political party since richer State’s tend to vote Democrat <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a>.</p>
+<p>The next variable is Median Household Income. First, it is important to understand median income for state’s in each political party since richer State’s tend to vote Democrat. <a href="#fn1" class="footnote-ref" id="fnref1" role="doc-noteref"><sup>1</sup></a> For this reason, plotting median income by safe-red and safe-blue states can give insight to natural differences. Additionally, observing trends from 2001 and 2024 could provide insights into how those differences evolved over time.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -443,8 +444,8 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>Throughout the 21st century from the beginning to the present, Democratic-voting states have a higher median income than Republican-voting states, which reinforces Dr.&nbsp;Gelman’s book on wealth and voting preferences <a href="#fn2" class="footnote-ref" id="fnref2" role="doc-noteref"><sup>2</sup></a>. Also, these values are adjusted for inflation in current dollars, so while Alaska is an outlier with their median income, the true value at the time was smaller.</p>
-<p>Both Democratic and Republican states seemed to experience the same relative median income increase from 2001 to 2024, both of their median values increased by a similar amount. Also, it seems that both Republican and Democratic states have higher variability in 2024 compared to 2001. Both box plots in 2024 are longer and have longer whiskers, communicating that the data is more spread out. Specifically, both Democratic and Republican state’s seem to skew more right in 2024 indicating a potential widening in wealth inequality among both sets of states.</p>
+<p>Throughout the 21st century from the beginning to the present, Democratic-voting states have a higher median income than Republican-voting states, which reinforces Dr.&nbsp;Gelman’s book on wealth and voting preferences.<sup>1</sup> However, Democratic and Republican states seemed to experience the same relative median income increase from 2001 to 2024, both of their median values increased by a similar amount.</p>
+<p>Also, it seems that both Republican and Democratic states exhibit greater variability in 2024 than in 2001. Both box plots in 2024 are longer, with longer whiskers, indicating that the data is more spread out. Specifically, both Democratic and Republican states seem to skew more right in 2024, indicating a potential widening in wealth inequality among both sets of states. Also, these values are adjusted for inflation in current dollars, so while Alaska is an outlier with its median income in 2001, the true value was smaller (still larger than all other states).</p>
 <p>Plotting median income by year averaged for each set of states can be helpful to see more granular trends at a year-by-year basis.</p>
 <div class="cell">
 <details class="code-fold">
@@ -494,7 +495,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>This plot again shows that Democratic State’s earn more than Republican states. However, this plot is interesting since it shows the patterns in median income change for both sets of states are the same. Republican and Democratic states’ median incomes change identically regardless of the administration’s political party. For example, they both had strong increases during the latter part of Obama’s term (2012-2016) and that growth continued with Trump prior to Covid (2017-2019). So, overall, there are not any indicators that show median income performance depends on the presidential party.</p>
+<p>This plot again shows that Democratic State’s earn more than Republican states, every year. However, notably, median income change and overall patterns for both sets of states are the same. Republican and Democratic states’ median incomes change identically regardless of the administration’s political party. For example, they both had strong increases during the latter part of Obama’s term (2012-2016) and that growth continued with Trump prior to Covid (2017-2019). So, overall, there are not any indicators that show median income performance depends on the presidential party.</p>
 <p>However, since the two sets of states have median income values that are fairly different, it could be more insightful to plot relative growth. For example, indexing the average median income to better see how the two sets of state’s perform relative to the start of the 21st century to try to identify smaller slope differences.</p>
 <div class="cell">
 <details class="code-fold">
@@ -551,11 +552,11 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>When the average median income is indexed, smaller slope differences are easier to see. For example, during Bush and Trump (both red backgrounds), Democratic states had instances of higher relative median income, while Republican States never outperformed Democratic States. Additionally, both sets of states performed very similar under Obama, but near the end, and transitioning under Trump, Democratic State’s began to perform a lot better. This pattern carried into Biden’s term with Democratic State staying above Republican States.</p>
+<p>When the average median income is indexed, smaller slope differences are easier to see. For example, during Bush and Trump (both red backgrounds), Democratic states had instances of higher relative median income, while Republican States never outperformed Democratic States. Additionally, both sets of states performed very similar under Obama, but near the end, and transitioning to Trump, Democratic State’s began to perform a lot better. This pattern carried into Biden’s term with Democratic States staying above Republican States. Overall, this plot communicates that Democratic states actually had higher median income change under Republican presidents while Republican state’s never outperformed Democratic states, regardless of presidential party.</p>
 </section>
 <section id="personal-income-disposable-personal-income-and-personal-consumption-expenditures" class="level2" data-number="3.3">
 <h2 data-number="3.3" class="anchored" data-anchor-id="personal-income-disposable-personal-income-and-personal-consumption-expenditures"><span class="header-section-number">3.3</span> Personal Income, Disposable Personal Income, and Personal Consumption Expenditures</h2>
-<p>This last section will explore three additional variables together: Personal Income, Disposable Personal Income, and Personal Consumption Expenditures. Also, since certain states may have higher values for various reasons not related to politics, the difference value for each state subtracted the US to obtain a more standardized measure for relative performance for these variables.</p>
+<p>This last section will explore three additional variables together: Personal Income, Disposable Personal Income, and Personal Consumption Expenditures. Also, since certain states may have higher values for various reasons not related to politics, the difference value for each state subtracted from the US difference was used to obtain a more standardized measure for relative performance. Also, for these variables a negative value indicates worse peformance, while a positive peformance reflects positive economic changes.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -572,7 +573,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="at">.groups =</span> <span class="st">"drop"</span></span>
 <span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">|&gt;</span>  </span>
 <span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>  <span class="fu">rename</span>(<span class="st">"Personal Income"</span> <span class="ot">=</span> <span class="st">'dif_PC_PI_US'</span>,</span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Disposable Income"</span> <span class="ot">=</span> <span class="st">'dif_PC_DPI_US'</span>,</span>
+<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Disposable Personal Income"</span> <span class="ot">=</span> <span class="st">'dif_PC_DPI_US'</span>,</span>
 <span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>         <span class="st">"Personal Consumption Expenditures"</span> <span class="ot">=</span> <span class="st">'dif_PC_PCE_US'</span>) <span class="sc">|&gt;</span></span>
 <span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>  <span class="fu">pivot_longer</span>(</span>
 <span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    <span class="at">cols =</span> <span class="st">`</span><span class="at">Personal Income</span><span class="st">`</span><span class="sc">:</span><span class="st">`</span><span class="at">Personal Consumption Expenditures</span><span class="st">`</span>,</span>
@@ -601,7 +602,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>While there are not huge differences between Democrat and Republican administrations on the different state’s, it is clear that under Republican presidents, Republican state’s have larger positive tails. This indicates that there are more Republican state’s that perform better than the US than they would under Democratic presidents. For example, there is a strong positive tail for Personal Income and Disposable Personal Income for Republican States under Republican administrations. Alternatively, some Democratic states have longer negative tails under Republican administrations. For Personal Income and Disposable Personal Income there are left tails that go farther out than any Republican states. However, for the most part, Republican state distributions are farther negative (peforming worse compared to the US), compared to Democratic states.</p>
+<p>While the majority of Republican state’s have smaller values than Democratic states, regardless of presidential party, it is noteworthy that the spread and tail behavior of these state’s change depending on the presidential party. For example, for personal income and disposable personal income, Republican states have longer and heavier right tails under Republican presidents, indicating more positive trends. Additionally, while the mode of Democratic states for personal income and disposable personal income does not change drastically between presidential parties, outliers seem to flip. For example, Democratic states have small right tails under Democratic presidents and small left tails under Republican presidents. This could indicate that there may be a small amount of states that perform differently under different political parties.</p>
+<p>Interestingly, there is very little change for personal consumption expenditures across all states and presidential parties. This variable, potentially, could be less affected by presidential policies and more influenced by state purchasing preferences.</p>
+<p>To better understand personal consumption expenditures, it could be valuable to plot it with disposable personal income to better understand state’s that spend and save their post-tax incomes</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -630,14 +633,14 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb9-23"><a href="#cb9-23" aria-hidden="true" tabindex="-1"></a>)) <span class="sc">+</span></span>
 <span id="cb9-24"><a href="#cb9-24" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="at">size =</span> <span class="dv">2</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
 <span id="cb9-25"><a href="#cb9-25" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="co"># ---- NEW PART: LABEL OUTLIERS ----</span></span>
-<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>(</span>
-<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> outlier_label),</span>
-<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">3</span>,</span>
-<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">max.overlaps =</span> <span class="cn">Inf</span>,</span>
-<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">box.padding =</span> <span class="fl">0.4</span>,</span>
-<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">point.padding =</span> <span class="fl">0.2</span>,</span>
-<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">min.segment.length =</span> <span class="dv">0</span></span>
+<span id="cb9-26"><a href="#cb9-26" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text_repel</span>(</span>
+<span id="cb9-27"><a href="#cb9-27" aria-hidden="true" tabindex="-1"></a>    <span class="fu">aes</span>(<span class="at">label =</span> outlier_label),</span>
+<span id="cb9-28"><a href="#cb9-28" aria-hidden="true" tabindex="-1"></a>    <span class="at">size =</span> <span class="dv">3</span>,</span>
+<span id="cb9-29"><a href="#cb9-29" aria-hidden="true" tabindex="-1"></a>    <span class="at">max.overlaps =</span> <span class="cn">Inf</span>,</span>
+<span id="cb9-30"><a href="#cb9-30" aria-hidden="true" tabindex="-1"></a>    <span class="at">box.padding =</span> <span class="fl">0.4</span>,</span>
+<span id="cb9-31"><a href="#cb9-31" aria-hidden="true" tabindex="-1"></a>    <span class="at">point.padding =</span> <span class="fl">0.2</span>,</span>
+<span id="cb9-32"><a href="#cb9-32" aria-hidden="true" tabindex="-1"></a>    <span class="at">min.segment.length =</span> <span class="dv">0</span>, </span>
+<span id="cb9-33"><a href="#cb9-33" aria-hidden="true" tabindex="-1"></a>    <span class="at">show.legend =</span> <span class="cn">FALSE</span></span>
 <span id="cb9-34"><a href="#cb9-34" aria-hidden="true" tabindex="-1"></a>  ) <span class="sc">+</span></span>
 <span id="cb9-35"><a href="#cb9-35" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb9-36"><a href="#cb9-36" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> administration) <span class="sc">+</span></span>
@@ -659,8 +662,9 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>These plots aim to understand State’s Disposable Income and Personal Consumption Expenditures, which can give insight into State household economic resources. For all four administrations, there are clear clustering between Democrat and Republican States. Overall, Democratic states tend to have higher Disposable Income and Personal Consumption Expenditures. However, under Trump and Bush the difference is smaller. Specifically, under Bush more Republican states have larger Disposable Income, and under Trump the state’s are a lot closer together.</p>
-<p>Additionally, it is interesting how the District of Columbia and Wyoming are consistent outlines for Personal Consumption Expenditures and Disposable Income, respectively, across multiple administrations.</p>
+<p>Notably, for all four administrations, there are clear clustering between Democrat and Republican states. Overall, Democratic states tend to have higher disposable personal income and personal consumption expenditures compared to Republican states. However, under Trump and Bush the difference is smaller. Specifically, under Bush more Republican states have larger disposable personal income, and under Trump the state’s are a all clustered together. Overall, Democratic states seem to experience positive economic outcomes under Democratic presidents for both variables, while Republican state’s only seem to experience positive outcomes under Bush, and for personal consumption expenditures.</p>
+<p>Additionally, it is interesting how the District of Columbia and Wyoming are consistent outliers for personal consumption expenditures and disposable personal income, respectively, across multiple administrations.</p>
+<p>Lastly, creating PCA plots for the states and variables, across administration party, can be insightful in better understanding if there are naturally groupings of state, potentially identifying relationships beyond political party.</p>
 <div class="cell">
 <details class="code-fold">
 <summary>Code</summary>
@@ -717,7 +721,7 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-51"><a href="#cb10-51" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_point</span>(<span class="fu">aes</span>(<span class="at">color =</span> color), <span class="at">size =</span> <span class="dv">3</span>, <span class="at">alpha =</span> <span class="fl">0.8</span>) <span class="sc">+</span></span>
 <span id="cb10-52"><a href="#cb10-52" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-53"><a href="#cb10-53" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_text</span>(<span class="fu">aes</span>(<span class="at">label =</span> State, <span class="at">color =</span> color),</span>
-<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">2.5</span>,) <span class="sc">+</span></span>
+<span id="cb10-54"><a href="#cb10-54" aria-hidden="true" tabindex="-1"></a>            <span class="at">size =</span> <span class="fl">2.5</span>, <span class="at">vjust =</span> <span class="sc">-</span><span class="fl">0.8</span>) <span class="sc">+</span></span>
 <span id="cb10-55"><a href="#cb10-55" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb10-56"><a href="#cb10-56" aria-hidden="true" tabindex="-1"></a>  <span class="fu">geom_segment</span>(<span class="at">data =</span> loadings,</span>
 <span id="cb10-57"><a href="#cb10-57" aria-hidden="true" tabindex="-1"></a>               <span class="fu">aes</span>(<span class="at">x =</span> <span class="dv">0</span>, <span class="at">y =</span> <span class="dv">0</span>,</span>
@@ -732,14 +736,15 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 <span id="cb10-66"><a href="#cb10-66" aria-hidden="true" tabindex="-1"></a>                <span class="at">label =</span> variable),</span>
 <span id="cb10-67"><a href="#cb10-67" aria-hidden="true" tabindex="-1"></a>            <span class="at">color =</span> <span class="st">"black"</span>, <span class="at">size =</span> <span class="dv">3</span>) <span class="sc">+</span></span>
 <span id="cb10-68"><a href="#cb10-68" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_identity</span>() <span class="sc">+</span></span>
-<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> admin_party) <span class="sc">+</span></span>
-<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
-<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
-<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"PCA of State-Level Economic Differences"</span>,</span>
-<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"PC1"</span>,</span>
-<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"PC2"</span></span>
-<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
+<span id="cb10-69"><a href="#cb10-69" aria-hidden="true" tabindex="-1"></a>  </span>
+<span id="cb10-70"><a href="#cb10-70" aria-hidden="true" tabindex="-1"></a>  <span class="fu">scale_color_identity</span>() <span class="sc">+</span></span>
+<span id="cb10-71"><a href="#cb10-71" aria-hidden="true" tabindex="-1"></a>  <span class="fu">facet_wrap</span>(<span class="sc">~</span> admin_party) <span class="sc">+</span></span>
+<span id="cb10-72"><a href="#cb10-72" aria-hidden="true" tabindex="-1"></a>  <span class="fu">theme_minimal</span>() <span class="sc">+</span></span>
+<span id="cb10-73"><a href="#cb10-73" aria-hidden="true" tabindex="-1"></a>  <span class="fu">labs</span>(</span>
+<span id="cb10-74"><a href="#cb10-74" aria-hidden="true" tabindex="-1"></a>    <span class="at">title =</span> <span class="st">"PCA of State-Level Economic Differences"</span>,</span>
+<span id="cb10-75"><a href="#cb10-75" aria-hidden="true" tabindex="-1"></a>    <span class="at">x =</span> <span class="st">"PC1"</span>,</span>
+<span id="cb10-76"><a href="#cb10-76" aria-hidden="true" tabindex="-1"></a>    <span class="at">y =</span> <span class="st">"PC2"</span></span>
+<span id="cb10-77"><a href="#cb10-77" aria-hidden="true" tabindex="-1"></a>  )</span></code></pre></div><button title="Copy to Clipboard" class="code-copy-button"><i class="bi"></i></button></div>
 </details>
 <div class="cell-output-display">
 <div>
@@ -749,20 +754,23 @@ pre > code.sourceCode > span > a:first-child::before { text-decoration: underlin
 </div>
 </div>
 </div>
-<p>These biplots map the same PCA lines but adjust the location of the States to see specific trends across different political administrations. Under Republican administrations there are clearer clusters specifically for Republican States. States like Oklahoma, North Dakota, South Dakota, and Wyoming are very high on DPI and PI, while there is a cluster of red states lower. Additionally, very few Republican states are high on variables under Democratic administrations. Under Democratic administrations, Democratic states perform well, specifically for PCE.</p>
-<p>Looking at clusters, larger, more populated states, like California, New York, Massachusetts, are bigger outliers under Democratic administrations. Comparatively, under Republican administrates they tend to be closer with other states.</p>
-<p>Also, the cluster of Oklahoma, North Dakota, South Dakota, and Wyoming, related back to the findings on middle of the country states. They are higher on income related factors like PI and DPI under republican administrations which could indicate again those state’s benefit under Republican administration because of their geographical location.</p>
+<p>These biplots map the same PCA lines but adjust the location of the States to see specific trends across different political administrations. There are clear differences in location and clustering between presidential parties. Under Republican presidents, there is a clear cluster of states with high disposable personal income and personal income: Oklahoma, North Dakota, South Dakota, and Wyoming. Additionally, under Republican presidents, Democratic states tend to be clustered around the middle of each variable, not showing strong positive performance. Comparatively, under Democratic presidents, Democratic states are slightly more spread out, specifically higher on personal consumption expenditures.</p>
+<p>Furthermore, certain states fluctuate more than other states, even within the same political party. For example, North Dakota is high for disposable personal income and personal income under Republican presidents, but is high for personal consumption expenditures under Democratic presidents. Additionally, Delaware is around the middle for each variable under Democratic states, but a far outlier lower on disposable personal income, personal income, and high for personal consumption expenditures. This pattern of state specific differences follows the patterns identified for unemployment rate, highlighting that certain states experience bigger changes.</p>
+<p>Lastly, looking at clusters, larger, more populated states, like California, New York, Massachusetts, are bigger outliers under Democratic administrations. Comparatively, under Republican administrates they tend to be closer with other states.</p>
 </section>
 <section id="summary" class="level2" data-number="3.4">
 <h2 data-number="3.4" class="anchored" data-anchor-id="summary"><span class="header-section-number">3.4</span> Summary</h2>
+<p>Overall, this analysis highlights trends in specific economic variables and across general economic factors in safe states. Safe states tend to experience better economic outcomes under their receptive presidential party, however, the degree of that experience varies across variables and states. For example, the unemployment rate showed strong differences between red and blue states under different administrations, with states tending to have lower unemployment under their respective presidents. However, Republican states showed larger differences across presidential administrations, and within that, middle-of-the-country Republican states experienced greater fluctuations.</p>
+<p>Median income identified general trends across both Democratic and Republican states. In contrast to the unemployment rate, Democratic states showed greater fluctuations in median household income, with their relative changes increasing more sharply than those in Republican states. Interestingly, their median household income fluctuated regardless of political party, and often increased more during Republican presidents.</p>
+<p>Lastly, personal income, disposable personal income, and personal consumption expenditures showed strong trends across blue and red states under specific administrations, and also identified state-specific trends introduced by the unemployment rate analysis. For example, there were positive shifts in disposable personal income and personal income for both Democratic and Republican states under their respective administration. Additionally, the analysis identified natural groupings and differences across states, which could indicate a stronger impact on state behavior beyond voting preferences.</p>
+<p>Overall, the results suggest that states benefit under the administrations they consistently support. However, this analysis indicates that other factors could likely contribute to the observed state-by-state differences.</p>
 
 
 </section>
 <section id="footnotes" class="footnotes footnotes-end-of-document" role="doc-endnotes">
 <hr>
 <ol>
-<li id="fn1"><p>See Andrew Gelman et al., <em>Red State, Blue State, Rich State, Poor State: Why Americans Vote the Way They Do</em> (Princeton University Press, 2009).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
-<li id="fn2"><p>See Andrew Gelman et al., <em>Red State, Blue State, Rich State, Poor State: Why Americans Vote the Way They Do</em> (Princeton University Press, 2009).<a href="#fnref2" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
+<li id="fn1"><p>See Andrew Gelman et al., <em>Red State, Blue State, Rich State, Poor State</em> (Princeton University Press, 2009).<a href="#fnref1" class="footnote-back" role="doc-backlink">↩︎</a></p></li>
 </ol>
 </section>
 
