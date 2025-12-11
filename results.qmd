@@ -423,8 +423,8 @@ Additionally, it is interesting how the District of Columbia and Wyoming are con
 
 Lastly, creating PCA plots for the states and variables, across administration party, can be insightful in better understanding if there are natural groupings of states, potentially identifying relationships beyond political party. 
 ```{r}
-#| fig-height: 12
-#| fig-width: 18
+#| fig-height: 15
+#| fig-width: 20
 library(dplyr)
 library(ggplot2)
 
@@ -483,10 +483,10 @@ arrow_scale <- score_range / loading_range * 0.3
 
 ggplot(scores, aes(x = PC1, y = PC2)) +
 
-  geom_point(aes(color = color), size = 3, alpha = 0.8) +
+  geom_point(aes(color = color), size = 2, alpha = 0.8) +
 
   geom_text(aes(label = State, color = color),
-            size = 2.5, vjust = -0.8) +
+            size = 3.5, vjust = -0.9) +
 
   geom_segment(data = loadings,
                aes(x = 0, y = 0,
@@ -499,12 +499,12 @@ ggplot(scores, aes(x = PC1, y = PC2)) +
             aes(x = PC1 * arrow_scale*1.05, 
                 y = PC2 * arrow_scale*1.05, 
                 label = variable),
-            color = "black", size = 3) +
+            color = "black", size = 4) +
 
   
   scale_color_identity() +
   facet_wrap(~ admin_party) +
-  theme_minimal() +
+  theme_minimal(base_size = 14) +
   labs(
     title = "PCA of State-Level Economic Differences",
     x = "PC1",
