@@ -130,7 +130,7 @@ A heat map showing the standard deviation of unemployment rate change relative t
 ```{r}
 state_order <- unemployement_us_avg |>
   group_by(State) |>
-  summarise(var_gap = sd(dif_from_us, na.rm = TRUE), .groups = "drop") %>%
+  summarise(var_gap = sd(dif_from_us, na.rm = TRUE), .groups = "drop") |>
   arrange(var_gap) |>
   pull(State)
 
